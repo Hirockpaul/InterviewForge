@@ -13,8 +13,7 @@ export const router = createBrowserRouter([
         path: "/register",
         element: <Register />,
     }, {
-        path:"/",
-        element:<Protected><h1>Home page</h1></Protected>
-
+        path: "/",
+        element: <Protected><Home /></Protected>
     }
 ]);

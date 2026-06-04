@@ -4,13 +4,20 @@ const mongoose = require('mongoose')
 
 async function connectToDB(){
 
-    try { 
-    await mongoose.connect(process.env.MONGO_URI)
+    const mongoUri = process.env.MONGO_URI
 
-    console.log('Connected to MongoDB')
+    if (!mongoUri) {
+        throw new Error('MONGO_URI is missing. Add it to Backend/.env')
+    }
+
+    try {
+        await mongoose.connect(mongoUri)
+
+        console.log('Connected to MongoDB')
     }
     catch(err){
-        console.log(err)
+        console.error('MongoDB connection failed:', err.message)
+        throw err
     }
 }
 
