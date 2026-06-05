@@ -152,6 +152,6 @@ http://localhost:3000
 * Interview performance analytics
 * Multi-model AI support
 
-## License
 
-This project is intended for educational and portfolio purposes. Add an appropriate license before public distribution.
+
+
