@@ -130,6 +130,13 @@ async function generateResumePdfController(req, res) {
 
         res.send(pdfBuffer)
     } catch (error) {
+        if (error.code === "PDF_BROWSER_SETUP_ERROR") {
+            return res.status(503).json({
+                message: "Resume PDF generation is not configured on this machine.",
+                error: error.message
+            })
+        }
+
         res.status(500).json({
             message: "Failed to generate resume PDF.",
             error: error.message
