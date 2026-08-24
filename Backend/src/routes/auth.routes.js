@@ -1,6 +1,7 @@
 const {Router} = require('express')
 const authController = require('../controllers/auth.controller')
 const authMiddleware = require('../middlewares/auth.middlewares')
+const { authLimiter } = require('../middlewares/rateLimit.middlewares')
 
 const authRoutes = Router()
 
@@ -9,7 +10,7 @@ const authRoutes = Router()
  * @description Register a new user
  * @access Public
  */
-authRoutes.post('/register', authController.registerUserController)
+authRoutes.post('/register', authLimiter, authController.registerUserController)
 
 
 /**
@@ -17,7 +18,10 @@ authRoutes.post('/register', authController.registerUserController)
  * @description login a user with email and password
  * @access Public
  */
-authRoutes.post('/login', authController.loginUserController)
+authRoutes.post('/login', authLimiter, authController.loginUserController)
+
+authRoutes.post('/google', authLimiter, authController.googleLoginController)
+authRoutes.post('/refresh', authLimiter, authController.refreshSessionController)
  
 
 /**
@@ -25,7 +29,7 @@ authRoutes.post('/login', authController.loginUserController)
  * @description claer token from cookie and add the token in blacklist
  * @access Private
  */
-authRoutes.get('/logout', authMiddleware.authUser, authController.logoutUserController)
+authRoutes.post('/logout', authController.logoutUserController)
 
 
 /**
@@ -36,5 +40,3 @@ authRoutes.get('/logout', authMiddleware.authUser, authController.logoutUserCont
 authRoutes.get('/get-me', authMiddleware.authUser, authController.getMeController)
 
 module.exports = authRoutes
-
-

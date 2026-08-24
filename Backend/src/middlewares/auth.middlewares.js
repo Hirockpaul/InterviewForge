@@ -22,6 +22,9 @@ async function authUser(req,res,next) {
 
     try { 
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        if (decoded.tokenType && decoded.tokenType !== 'access') {
+            return res.status(401).json({ message: "Invalid access token" })
+        }
         req.user = decoded
 
         next()

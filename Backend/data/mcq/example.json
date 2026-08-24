@@ -1,0 +1,18 @@
+{
+  "questions": [
+    {
+      "question": "Which JavaScript construct represents the eventual completion or failure of an asynchronous operation?",
+      "options": ["Promise", "Symbol", "Proxy", "WeakMap"],
+      "correctOption": 0,
+      "explanation": "A Promise represents an asynchronous operation and its eventual result or failure.",
+      "topic": "JavaScript",
+      "subtopic": "Promises",
+      "category": "programming",
+      "difficulty": "easy",
+      "tags": ["javascript", "async", "promises"],
+      "source": "curated",
+      "sourceReference": "InterviewForge example dataset",
+      "license": "Project-owned example content"
+    }
+  ]
+}

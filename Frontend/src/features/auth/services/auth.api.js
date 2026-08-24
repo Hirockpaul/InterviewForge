@@ -1,10 +1,4 @@
-import axios from "axios"
-
-
-const api = axios.create({
-    baseURL:"http://localhost:3000",
-    withCredentials:true
-})
+import api from '../../../services/api'
 
 export async function register({username, email, password}) {
 
@@ -42,10 +36,15 @@ export async function login({email, password}) {
 
 }
 
+export async function loginWithGoogle(code) {
+  const response = await api.post('/api/auth/google', { code })
+  return response.data
+}
+
 export async function logout() {
   try {
     
-     const response = await api.get('/api/auth/logout')
+     const response = await api.post('/api/auth/logout')
 
      return response.data
   } catch (err) {

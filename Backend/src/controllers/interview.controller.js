@@ -1,6 +1,9 @@
 const pdfParse = require("pdf-parse")
 const { generateInterviewReport, generateResumePdf } = require("../services/ai.services")
 const interviewReportModel = require("../models/interviewReport.model")
+const mongoose = require("mongoose")
+
+const isValidId = (id) => mongoose.isValidObjectId(id)
 
 
 
@@ -10,20 +13,23 @@ const interviewReportModel = require("../models/interviewReport.model")
  */
 async function generateInterViewReportController(req, res) {
     try {
-        if (!req.file) {
-            return res.status(400).json({
-                message: "Resume PDF is required."
-            })
-        }
+        const { selfDescription = "", jobDescription = "" } = req.body
 
-        const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
-        const { selfDescription, jobDescription } = req.body
-
-        if (!jobDescription) {
+        if (!jobDescription.trim()) {
             return res.status(400).json({
                 message: "Job description is required."
             })
         }
+
+        if (!req.file && !selfDescription.trim()) {
+            return res.status(400).json({
+                message: "A resume PDF or self-description is required."
+            })
+        }
+
+        const resumeContent = req.file
+            ? await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
+            : { text: "" }
 
         const interViewReportByAi = await generateInterviewReport({
             resume: resumeContent.text,
@@ -60,6 +66,10 @@ async function getInterviewReportByIdController(req, res) {
 
         const { interviewId } = req.params
 
+        if (!isValidId(interviewId)) {
+            return res.status(400).json({ message: "Invalid interview ID." })
+        }
+
         const interviewReport = await interviewReportModel.findOne({ _id: interviewId, user: req.user.id })
 
         if (!interviewReport) {
@@ -77,6 +87,29 @@ async function getInterviewReportByIdController(req, res) {
             message: "Failed to fetch interview report.",
             error: error.message
         })
+    }
+}
+
+async function deleteInterviewReportController(req, res) {
+    try {
+        const { interviewId } = req.params
+
+        if (!isValidId(interviewId)) {
+            return res.status(400).json({ message: "Invalid interview ID." })
+        }
+
+        const interviewReport = await interviewReportModel.findOneAndDelete({
+            _id: interviewId,
+            user: req.user.id
+        })
+
+        if (!interviewReport) {
+            return res.status(404).json({ message: "Interview report not found." })
+        }
+
+        return res.status(200).json({ message: "Interview report deleted successfully." })
+    } catch {
+        return res.status(500).json({ message: "Failed to delete interview report." })
     }
 }
 
@@ -107,6 +140,10 @@ async function getAllInterviewReportsController(req, res) {
 async function generateResumePdfController(req, res) {
     try {
         const { interviewReportId } = req.params
+
+        if (!isValidId(interviewReportId)) {
+            return res.status(400).json({ message: "Invalid interview report ID." })
+        }
 
         const interviewReport = await interviewReportModel.findOne({
             _id: interviewReportId,
@@ -144,4 +181,4 @@ async function generateResumePdfController(req, res) {
     }
 }
 
-module.exports = { generateInterViewReportController, getInterviewReportByIdController, getAllInterviewReportsController, generateResumePdfController }
+module.exports = { generateInterViewReportController, getInterviewReportByIdController, getAllInterviewReportsController, deleteInterviewReportController, generateResumePdfController }

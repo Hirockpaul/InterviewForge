@@ -1,6 +1,5 @@
 const { GoogleGenAI } = require("@google/genai")
 const { z } = require("zod")
-const { zodToJsonSchema } = require("zod-to-json-schema")
 const puppeteer = require("puppeteer")
 
 const ai = new GoogleGenAI({
@@ -83,11 +82,11 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
         contents: prompt,
         config: {
             responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(interviewReportSchema),
+            responseJsonSchema: z.toJSONSchema(interviewReportSchema),
         }
     })
 
-    return JSON.parse(response.text)
+    return interviewReportSchema.parse(JSON.parse(response.text))
 
 
 }
@@ -138,12 +137,12 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
         contents: prompt,
         config: {
             responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(resumePdfSchema),
+            responseJsonSchema: z.toJSONSchema(resumePdfSchema),
         }
     })
 
 
-    const jsonContent = JSON.parse(response.text)
+    const jsonContent = resumePdfSchema.parse(JSON.parse(response.text))
 
     const pdfBuffer = await generatePdfFromHtml(jsonContent.html)
 
@@ -151,4 +150,4 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
 
 }
 
-module.exports = { generateInterviewReport, generateResumePdf }
+module.exports = { generateInterviewReport, generateResumePdf, ai }

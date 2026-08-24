@@ -1,0 +1,20 @@
+const express = require('express')
+const { authUser } = require('../middlewares/auth.middlewares')
+const { aiLimiter } = require('../middlewares/rateLimit.middlewares')
+const controller = require('../controllers/preparation.controller')
+
+const router = express.Router()
+router.use(authUser)
+router.get('/question-bank', controller.listQuestions)
+router.post('/question-bank', controller.saveQuestion)
+router.delete('/question-bank/:id', controller.removeQuestion)
+router.get('/introductions', controller.listIntroductions)
+router.post('/introductions/generate', aiLimiter, controller.createIntroduction)
+router.put('/introductions/:id', controller.updateIntroduction)
+router.delete('/introductions/:id', controller.deleteIntroduction)
+router.post('/introductions/:id/practice', controller.practiceIntroduction)
+router.get('/projects', aiLimiter, controller.listProjects)
+router.post('/projects/questions', aiLimiter, controller.generateQuestions)
+router.get('/streak', controller.getStreak)
+
+module.exports = router

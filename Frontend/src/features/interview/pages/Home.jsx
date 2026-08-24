@@ -1,21 +1,70 @@
-import React, { useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
+import AppHeader from '../../../components/layout/AppHeader.jsx'
 
 const Home = () => {
 
     const { loading, generateReport,reports } = useInterview()
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
+    const [ resumeFile, setResumeFile ] = useState(null)
+    const [ resumeError, setResumeError ] = useState("")
+    const [ generationError, setGenerationError ] = useState("")
+    const [ isDraggingResume, setIsDraggingResume ] = useState(false)
     const resumeInputRef = useRef()
 
     const navigate = useNavigate()
 
+    const selectResume = (file) => {
+        if (!file) return
+
+        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+
+        if (!isPdf) {
+            setResumeFile(null)
+            setResumeError("Please upload a PDF file.")
+            if (resumeInputRef.current) resumeInputRef.current.value = ""
+            return
+        }
+
+        if (file.size > 3 * 1024 * 1024) {
+            setResumeFile(null)
+            setResumeError("Resume must be 3MB or smaller.")
+            if (resumeInputRef.current) resumeInputRef.current.value = ""
+            return
+        }
+
+        setResumeFile(file)
+        setResumeError("")
+    }
+
+    const handleResumeDrop = (event) => {
+        event.preventDefault()
+        setIsDraggingResume(false)
+        selectResume(event.dataTransfer.files[0])
+    }
+
     const handleGenerateReport = async () => {
-        const resumeFile = resumeInputRef.current.files[ 0 ]
-        const data = await generateReport({ jobDescription, selfDescription, resumeFile })
-        navigate(`/interview/${data._id}`)
+        setGenerationError("")
+
+        if (!jobDescription.trim()) {
+            setGenerationError("Please add the target job description.")
+            return
+        }
+
+        if (!resumeFile && !selfDescription.trim()) {
+            setResumeError("Upload a resume or add a self-description.")
+            return
+        }
+
+        try {
+            const data = await generateReport({ jobDescription, selfDescription, resumeFile })
+            navigate(`/interviews/${data._id}`)
+        } catch (error) {
+            setGenerationError(error.message)
+        }
     }
 
     if (loading) {
@@ -29,10 +78,13 @@ const Home = () => {
     return (
         <div className='home-page'>
 
+            <AppHeader />
+
             {/* Page Header */}
             <header className='page-header'>
-                <h1>Create Your Custom <span className='highlight'>Interview Plan</span></h1>
-                <p>Let our AI analyze the job requirements and your unique profile to build a winning strategy.</p>
+                <p className='page-header__eyebrow'>Personalized preparation</p>
+                <h1>Create your custom<br /><span>interview plan.</span></h1>
+                <p>Let AI turn your target role and experience into a focused strategy built around you.</p>
             </header>
 
             {/* Main Card */}
@@ -50,11 +102,12 @@ const Home = () => {
                         </div>
                         <textarea
                             onChange={(e) => { setJobDescription(e.target.value) }}
+                            value={jobDescription}
                             className='panel__textarea'
                             placeholder={`Paste the full job description here...\ne.g. 'Senior Frontend Engineer at Google requires proficiency in React, TypeScript, and large-scale system design...'`}
                             maxLength={5000}
                         />
-                        <div className='char-counter'>0 / 5000 chars</div>
+                        <div className='char-counter'>{jobDescription.length} / 5000 chars</div>
                     </div>
 
                     {/* Vertical Divider */}
@@ -75,14 +128,40 @@ const Home = () => {
                                 Upload Resume
                                 <span className='badge badge--best'>Best Results</span>
                             </label>
-                            <label className='dropzone' htmlFor='resume'>
+                            <div
+                                className={`dropzone${isDraggingResume ? " dropzone--dragging" : ""}${resumeFile ? " dropzone--success" : ""}${resumeError ? " dropzone--error" : ""}`}
+                                role='button'
+                                tabIndex={0}
+                                onClick={() => resumeInputRef.current?.click()}
+                                onKeyDown={(event) => {
+                                    if (event.key === "Enter" || event.key === " ") {
+                                        event.preventDefault()
+                                        resumeInputRef.current?.click()
+                                    }
+                                }}
+                                onDragEnter={(event) => {
+                                    event.preventDefault()
+                                    setIsDraggingResume(true)
+                                }}
+                                onDragOver={(event) => event.preventDefault()}
+                                onDragLeave={(event) => {
+                                    event.preventDefault()
+                                    if (!event.currentTarget.contains(event.relatedTarget)) setIsDraggingResume(false)
+                                }}
+                                onDrop={handleResumeDrop}
+                            >
                                 <span className='dropzone__icon'>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" /></svg>
+                                    {resumeFile ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m8 12 2.5 2.5L16 9" /></svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" /></svg>
+                                    )}
                                 </span>
-                                <p className='dropzone__title'>Click to upload or drag &amp; drop</p>
-                                <p className='dropzone__subtitle'>PDF or DOCX (Max 5MB)</p>
-                                <input ref={resumeInputRef} hidden type='file' id='resume' name='resume' accept='.pdf,.docx' />
-                            </label>
+                                <p className='dropzone__title'>{resumeFile ? "Resume ready" : isDraggingResume ? "Drop your resume here" : "Click to upload or drag & drop"}</p>
+                                <p className='dropzone__subtitle'>{resumeFile ? `${resumeFile.name} · ${(resumeFile.size / 1024 / 1024).toFixed(2)}MB` : "PDF only (Max 3MB)"}</p>
+                                <input ref={resumeInputRef} hidden type='file' id='resume' name='resume' accept='application/pdf,.pdf' onChange={(event) => selectResume(event.target.files[0])} />
+                            </div>
+                            {resumeError && <p className='upload-error' role='alert'>{resumeError}</p>}
                         </div>
 
                         {/* OR Divider */}
@@ -93,6 +172,7 @@ const Home = () => {
                             <label className='section-label' htmlFor='selfDescription'>Quick Self-Description</label>
                             <textarea
                                 onChange={(e) => { setSelfDescription(e.target.value) }}
+                                value={selfDescription}
                                 id='selfDescription'
                                 name='selfDescription'
                                 className='panel__textarea panel__textarea--short'
@@ -112,7 +192,10 @@ const Home = () => {
 
                 {/* Card Footer */}
                 <div className='interview-card__footer'>
-                    <span className='footer-info'>AI-Powered Strategy Generation &bull; Approx 30s</span>
+                    <span className='footer-info'>
+                        <strong>AI-powered strategy generation</strong>
+                        Approx. 30 seconds
+                    </span>
                     <button
                         onClick={handleGenerateReport}
                         className='generate-btn'>
@@ -120,23 +203,38 @@ const Home = () => {
                         Generate My Interview Strategy
                     </button>
                 </div>
+                {generationError && <p className='generation-error' role='alert'>{generationError}</p>}
             </div>
 
             {/* Recent Reports List */}
-            {reports.length > 0 && (
-                <section className='recent-reports'>
-                    <h2>My Recent Interview Plans</h2>
+            <section className='recent-reports'>
+                <div className='recent-reports__header'>
+                    <p>Continue preparing</p>
+                    <h2>Your recent plans</h2>
+                </div>
+                {reports.length > 0 ? (
                     <ul className='reports-list'>
                         {reports.map(report => (
-                            <li key={report._id} className='report-item' onClick={() => navigate(`/interview/${report._id}`)}>
-                                <h3>{report.title || 'Untitled Position'}</h3>
-                                <p className='report-meta'>Generated on {new Date(report.createdAt).toLocaleDateString()}</p>
-                                <p className={`match-score ${report.matchScore >= 80 ? 'score--high' : report.matchScore >= 60 ? 'score--mid' : 'score--low'}`}>Match Score: {report.matchScore}%</p>
+                            <li key={report._id}>
+                                <button className='report-item' type='button' onClick={() => navigate(`/interviews/${report._id}`)}>
+                                    <span className='report-item__topline'>
+                                        <h3>{report.title || 'Untitled Position'}</h3>
+                                        <span className='match-score'>{report.matchScore}% match</span>
+                                    </span>
+                                    <span className='report-meta'>Generated {new Date(report.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                    <span className='report-link'>View interview plan <span aria-hidden='true'>&rarr;</span></span>
+                                </button>
                             </li>
                         ))}
                     </ul>
-                </section>
-            )}
+                ) : (
+                    <div className='reports-empty'>
+                        <h3>No interview plans yet</h3>
+                        <p>Your personalized strategies will appear here after you generate your first plan.</p>
+                        <button type='button' onClick={() => document.querySelector('.interview-card')?.scrollIntoView({ behavior: 'smooth' })}>Create interview plan</button>
+                    </div>
+                )}
+            </section>
 
             {/* Page Footer */}
             <footer className='page-footer'>

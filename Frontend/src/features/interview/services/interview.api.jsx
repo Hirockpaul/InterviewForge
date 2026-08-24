@@ -1,9 +1,4 @@
-import axios from "axios";
-
-const api = axios.create({
-    baseURL: "http://localhost:3000",
-    withCredentials: true,
-})
+import api from '../../../services/api'
 
 
 /**
@@ -14,7 +9,7 @@ export const generateInterviewReport = async ({ jobDescription, selfDescription,
     const formData = new FormData()
     formData.append("jobDescription", jobDescription)
     formData.append("selfDescription", selfDescription)
-    formData.append("resume", resumeFile)
+    if (resumeFile) formData.append("resume", resumeFile)
 
     const response = await api.post("/api/interview/", formData, {
         headers: {
@@ -43,6 +38,11 @@ export const getInterviewReportById = async (interviewId) => {
 export const getAllInterviewReports = async () => {
     const response = await api.get("/api/interview/")
 
+    return response.data
+}
+
+export const deleteInterviewReport = async (interviewId) => {
+    const response = await api.delete(`/api/interview/report/${interviewId}`)
     return response.data
 }
 

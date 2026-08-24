@@ -1,0 +1,72 @@
+$foreground: #f2efe8;
+$accent: #e85d8a;
+$accent-bright: #f05a87;
+$muted: #9ca3af;
+$label: #d6d1c8;
+$card: #14171b;
+$surface: #191c21;
+$border: #292e35;
+$font-ui: 'Inter', system-ui, sans-serif;
+
+.app-header { position: relative; z-index: 30; width: 100%; max-width: 1200px; min-height: 48px; display: flex; align-items: center; gap: clamp(1rem, 2.5vw, 2.25rem); margin: 0 auto; font-family: $font-ui; }
+.app-brand { display: flex; flex: 0 0 auto; align-items: center; gap: .7rem; color: #eae7e0; font-size: 1rem; font-weight: 700; text-decoration: none; }
+.app-brand__mark { width: 32px; height: 32px; display: grid; place-items: center; border-radius: .35rem; background: $accent-bright; color: #fff; font-size: .7rem; font-weight: 800; }
+.app-brand:focus-visible, .app-menu-toggle:focus-visible, .app-account__trigger:focus-visible { outline: 2px solid $accent; outline-offset: 2px; }
+.app-header__content { min-width: 0; display: flex; flex: 1; align-items: center; justify-content: flex-end; gap: clamp(1rem, 2.5vw, 2rem); }
+
+.app-nav { display: flex; align-items: center; gap: clamp(.25rem, 1vw, .8rem); margin-left: auto; }
+.app-nav > a, .app-nav__trigger { position: relative; min-height: 38px; display: inline-flex; align-items: center; gap: .35rem; padding: 0 .55rem; border: 0; background: transparent; color: $muted; font: 600 .84rem $font-ui; text-decoration: none; white-space: nowrap; cursor: pointer; transition: color 160ms ease, background-color 160ms ease; }
+.app-nav > a::after, .app-nav__trigger::after { position: absolute; right: .55rem; bottom: 0; left: .55rem; height: 2px; border-radius: 2px; background: $accent; content: ''; opacity: 0; transform: scaleX(.4); transition: opacity 160ms ease, transform 160ms ease; }
+.app-nav > a:hover, .app-nav__trigger:hover, .app-nav > a.is-active, .app-nav__trigger.is-active { color: $foreground; }
+.app-nav > a.is-active::after, .app-nav__trigger.is-active::after { opacity: 1; transform: scaleX(1); }
+.app-nav > a:focus-visible, .app-nav__trigger:focus-visible { border-radius: .25rem; outline: 2px solid $accent; outline-offset: 2px; }
+
+.app-chevron { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; transition: transform 160ms ease; }
+.app-dropdown { position: relative; }
+.app-dropdown.is-open > button .app-chevron { transform: rotate(180deg); }
+.app-dropdown__menu { position: absolute; top: calc(100% + .65rem); right: 0; min-width: 205px; padding: .45rem; border: 1px solid $border; border-radius: .55rem; background: rgba($surface, .98); box-shadow: 0 16px 42px rgba(0, 0, 0, .35); opacity: 0; pointer-events: none; transform: translateY(-5px); transition: opacity 150ms ease, transform 150ms ease; }
+.app-dropdown__menu::before { position: absolute; top: -.7rem; right: 0; left: 0; height: .7rem; content: ''; }
+.app-dropdown__menu a, .app-dropdown__menu > button { width: 100%; min-height: 42px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem .7rem; border: 0; border-radius: .35rem; background: transparent; color: $label; font: 600 .82rem $font-ui; text-align: left; text-decoration: none; cursor: pointer; transition: background-color 150ms ease, color 150ms ease; }
+.app-dropdown__menu a:hover, .app-dropdown__menu > button:hover:not(:disabled), .app-dropdown__menu a.is-active { background: $card; color: $foreground; }
+.app-dropdown__menu a.is-active { box-shadow: inset 2px 0 $accent; }
+.app-dropdown__menu a:focus-visible, .app-dropdown__menu > button:focus-visible { outline: 2px solid $accent; outline-offset: -2px; }
+.app-dropdown__menu small { color: #737b87; font-size: .67rem; font-weight: 500; }
+.app-dropdown__menu > button:disabled { cursor: not-allowed; opacity: .55; }
+.app-dropdown.is-open > .app-dropdown__menu { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.app-dropdown__menu--practice { right: auto; left: 0; min-width: 250px; }
+.app-dropdown__menu--practice a { min-height: 53px; align-items: flex-start; flex-direction: column; justify-content: center; gap: .15rem; }
+
+.app-account__trigger { max-width: 205px; min-height: 40px; display: flex; align-items: center; gap: .55rem; padding: .25rem .45rem .25rem .3rem; border: 1px solid transparent; border-radius: .45rem; background: transparent; color: $label; font: 600 .82rem $font-ui; cursor: pointer; transition: border-color 160ms ease, background-color 160ms ease; }
+.app-account__trigger:hover, .app-account__trigger[aria-expanded='true'] { border-color: $border; background: $card; }
+.app-account__avatar { width: 29px; height: 29px; display: grid; flex: 0 0 auto; place-items: center; border: 1px solid #3c424b; border-radius: 50%; background: #242830; color: $foreground; font-size: .72rem; }
+.app-account__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-account__identity { display: flex; flex-direction: column; gap: .15rem; margin: -.1rem -.05rem .4rem; padding: .55rem .7rem .7rem; border-bottom: 1px solid $border; color: $foreground; font-size: .78rem; overflow-wrap: anywhere; }
+.app-account__identity span { color: $muted; font-size: .68rem; font-weight: 400; }
+.app-dropdown__menu .app-account__logout { margin-top: .35rem; border-top: 1px solid $border; border-radius: 0 0 .35rem .35rem; color: #f19aab; }
+
+.app-menu-toggle { display: none; width: 40px; height: 40px; align-items: center; justify-content: center; flex-direction: column; gap: 4px; margin-left: auto; border: 1px solid $border; border-radius: .4rem; background: transparent; cursor: pointer; }
+.app-menu-toggle span { width: 17px; height: 1.5px; border-radius: 2px; background: $label; transition: transform 160ms ease, opacity 160ms ease; }
+
+@media (max-width: 900px) {
+    .app-header { flex-wrap: wrap; gap: 0; }
+    .app-menu-toggle { display: flex; }
+    .app-menu-toggle[aria-expanded='true'] span:first-child { transform: translateY(5.5px) rotate(45deg); }
+    .app-menu-toggle[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
+    .app-menu-toggle[aria-expanded='true'] span:last-child { transform: translateY(-5.5px) rotate(-45deg); }
+    .app-header__content { width: 100%; max-height: 0; flex: 0 0 100%; align-items: stretch; flex-direction: column; gap: 0; overflow: hidden; opacity: 0; transition: max-height 260ms ease, opacity 180ms ease; }
+    .app-header__content.is-open { max-height: 720px; padding-top: .8rem; opacity: 1; overflow: visible; }
+    .app-nav { width: 100%; align-items: stretch; flex-direction: column; gap: .15rem; margin: 0; padding: .55rem 0; border-top: 1px solid $border; border-bottom: 1px solid $border; }
+    .app-nav > a, .app-nav__trigger { width: 100%; min-height: 42px; justify-content: space-between; padding: 0 .65rem; }
+    .app-nav > a::after, .app-nav__trigger::after { top: .55rem; right: auto; bottom: .55rem; left: 0; width: 2px; height: auto; transform: scaleY(.4); }
+    .app-nav > a.is-active::after, .app-nav__trigger.is-active::after { transform: scaleY(1); }
+    .app-dropdown__menu { position: static; max-height: 0; min-width: 0; padding: 0 .45rem; border: 0; border-radius: 0; background: transparent; box-shadow: none; opacity: 0; overflow: hidden; transform: none; transition: max-height 220ms ease, opacity 150ms ease, padding 220ms ease; }
+    .app-dropdown.is-open > .app-dropdown__menu { max-height: 290px; padding: .25rem .45rem .45rem; opacity: 1; }
+    .app-dropdown__menu--practice a { min-height: 47px; padding-left: 1rem; }
+    .app-account { padding: .55rem 0 0; }
+    .app-account__trigger { width: 100%; max-width: none; justify-content: flex-start; }
+    .app-account__trigger .app-chevron { margin-left: auto; }
+    .app-account__menu { margin-top: .2rem; }
+}
+
+@media (max-width: 420px) { .app-brand { font-size: .92rem; } .app-brand__mark { width: 30px; height: 30px; } }
+@media (prefers-reduced-motion: reduce) { .app-header *, .app-header *::after { transition-duration: .01ms !important; } }

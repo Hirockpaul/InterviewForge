@@ -1,15 +1,14 @@
-import { createContext,useState } from "react";
-
-
-export const InterviewContext = createContext()
+import { useState } from 'react'
+import InterviewContext from './interview-context'
 
 export const InterviewProvider = ({ children }) => {
     const [loading, setLoading] = useState(false)
     const [report, setReport] = useState(null)
     const [reports, setReports] = useState([])
+    const [error, setError] = useState('')
 
     return (
-        <InterviewContext.Provider value={{ loading, setLoading, report, setReport, reports, setReports }}>
+        <InterviewContext.Provider value={{ loading, setLoading, report, setReport, reports, setReports, error, setError }}>
             {children}
         </InterviewContext.Provider>
     )
