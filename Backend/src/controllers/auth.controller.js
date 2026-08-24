@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const tokenBlacklistModel = require('../models/blacklist.model')
 const { OAuth2Client } = require('google-auth-library')
+const { z } = require('zod')
+const { ALLOWED_AVATAR_STYLES, DEFAULT_AVATAR_STYLE } = require('../config/avatarStyles')
 
 const ACCESS_TOKEN_AGE = 15 * 60 * 1000
 const REFRESH_TOKEN_AGE = 30 * 24 * 60 * 60 * 1000
@@ -24,12 +26,12 @@ const cookieOptions = (maxAge) => {
 
 const createSession = (res, user) => {
     const accessToken = jwt.sign(
-        { id: user._id, username: user.username, tokenType: 'access' },
+        { id: user._id, username: user.username, sessionVersion: user.sessionVersion || 0, tokenType: 'access' },
         process.env.JWT_SECRET,
         { expiresIn: '15m' }
     )
     const refreshToken = jwt.sign(
-        { id: user._id, tokenType: 'refresh' },
+        { id: user._id, sessionVersion: user.sessionVersion || 0, tokenType: 'refresh' },
         refreshSecret(),
         { expiresIn: '30d' }
     )
@@ -38,11 +40,29 @@ const createSession = (res, user) => {
     res.cookie('refreshToken', refreshToken, cookieOptions(REFRESH_TOKEN_AGE))
 }
 
+const stableAvatarSeed = (user) => String(user.avatarSeed || user.username || user._id)
+
+const ensureAvatar = async (user) => {
+    let changed = false
+    if (!ALLOWED_AVATAR_STYLES.includes(user.avatarStyle)) { user.avatarStyle = DEFAULT_AVATAR_STYLE; changed = true }
+    if (!user.avatarSeed) { user.avatarSeed = stableAvatarSeed(user); changed = true }
+    if (changed) await user.save()
+    return user
+}
+
 const serializeUser = (user) => ({
     id: user._id,
     username: user.username,
-    email: user.email
+    email: user.email,
+    avatarStyle: ALLOWED_AVATAR_STYLES.includes(user.avatarStyle) ? user.avatarStyle : DEFAULT_AVATAR_STYLE,
+    avatarSeed: stableAvatarSeed(user),
+    memberSince: user.createdAt || user._id?.getTimestamp?.() || null
 })
+
+const profileUpdateSchema = z.object({
+    displayName: z.string().trim().min(2).max(40),
+    avatarStyle: z.enum(ALLOWED_AVATAR_STYLES)
+}).strict()
 
 
 /**
@@ -78,6 +98,7 @@ async function registerUserController(req,res) {
             password: hashedPassword
          })
 
+        await ensureAvatar(user)
         createSession(res, user)
 
         res.status(201).json({
@@ -97,7 +118,7 @@ async function loginUserController(req, res) {
 
     const {email, password} = req.body
 
-    const user = await userModel.findOne({email})
+    const user = await userModel.findOne({email}).select('+password +sessionVersion')
 
     if(!user) {
         return res.status(400).json({
@@ -113,6 +134,7 @@ async function loginUserController(req, res) {
         })
     }
 
+    await ensureAvatar(user)
     createSession(res, user)
     res.status(200).json({
         message: "user loggedIn successfully",
@@ -150,7 +172,7 @@ async function googleLoginController(req, res) {
     const normalizedEmail = profile.email.toLowerCase()
     let user = await userModel.findOne({
         $or: [{ googleId: profile.sub }, { email: normalizedEmail }]
-    })
+    }).select('+sessionVersion')
 
     if (user) {
         if (!user.googleId) {
@@ -178,6 +200,7 @@ async function googleLoginController(req, res) {
         })
     }
 
+    await ensureAvatar(user)
     createSession(res, user)
     return res.status(200).json({
         message: 'Google login successful',
@@ -194,9 +217,18 @@ async function googleLoginController(req, res) {
  */
 async function logoutUserController(req, res) {
     const token = req.cookies.token
+    const refreshToken = req.cookies.refreshToken
 
     if(token) {
         await tokenBlacklistModel.create({token})
+    }
+    if (refreshToken) {
+        try {
+            const decoded = jwt.verify(refreshToken, refreshSecret())
+            if (decoded.tokenType === 'refresh') await userModel.findByIdAndUpdate(decoded.id, { $inc: { sessionVersion: 1 } })
+        } catch {
+            // Invalid refresh cookies are still cleared below.
+        }
     }
     res.clearCookie('token', cookieOptions())
     res.clearCookie('refreshToken', cookieOptions())
@@ -218,13 +250,20 @@ async function refreshSessionController(req, res) {
             return res.status(401).json({ message: 'Invalid refresh token.' })
         }
 
-        const user = await userModel.findById(decoded.id)
+        const user = await userModel.findById(decoded.id).select('+sessionVersion')
         if (!user) {
             res.clearCookie('token', cookieOptions())
             res.clearCookie('refreshToken', cookieOptions())
             return res.status(401).json({ message: 'Account no longer exists.' })
         }
 
+        if ((decoded.sessionVersion || 0) !== (user.sessionVersion || 0)) {
+            res.clearCookie('token', cookieOptions())
+            res.clearCookie('refreshToken', cookieOptions())
+            return res.status(401).json({ message: 'Session has been revoked. Please log in again.' })
+        }
+
+        await ensureAvatar(user)
         createSession(res, user)
         return res.status(200).json({ user: serializeUser(user) })
     } catch {
@@ -241,11 +280,13 @@ async function refreshSessionController(req, res) {
  * @access private
  */
 async function getMeController(req, res) {
-    const user = await userModel.findById(req.user.id)
+    const user = await userModel.findById(req.user.id).select('+sessionVersion')
 
     if (!user) {
         return res.status(401).json({ message: 'Account no longer exists.' })
     }
+
+    await ensureAvatar(user)
 
     if (!req.cookies.refreshToken) {
         createSession(res, user)
@@ -254,12 +295,28 @@ async function getMeController(req, res) {
 
     res.status(200).json({
         message: "User details fetched successfully",
-        user: {
-            id: user._id,
-            username: user.username,
-            email: user.email
-        }
+        user: serializeUser(user)
     })
+}
+
+async function updateProfileController(req, res) {
+    const parsed = profileUpdateSchema.safeParse(req.body)
+    if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0].message })
+
+    try {
+        const user = await userModel.findById(req.user.id)
+        if (!user) return res.status(401).json({ message: 'Account no longer exists.' })
+
+        user.username = parsed.data.displayName
+        user.avatarStyle = parsed.data.avatarStyle
+        if (!user.avatarSeed) user.avatarSeed = stableAvatarSeed(user)
+        await user.save()
+        return res.json({ message: 'Profile updated successfully.', user: serializeUser(user) })
+    } catch (error) {
+        if (error.code === 11000) return res.status(409).json({ message: 'That display name is already in use.' })
+        console.error('Profile update failed:', error.message)
+        return res.status(500).json({ message: 'Profile could not be updated.' })
+    }
 }
 
 
@@ -269,6 +326,9 @@ module.exports = {
      googleLoginController,
      refreshSessionController,
      logoutUserController,
-     getMeController
+     getMeController,
+     updateProfileController,
+     profileUpdateSchema,
+     serializeUser
 
 }

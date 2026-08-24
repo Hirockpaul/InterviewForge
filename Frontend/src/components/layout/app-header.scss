@@ -38,7 +38,7 @@ $font-ui: 'Inter', system-ui, sans-serif;
 
 .app-account__trigger { max-width: 205px; min-height: 40px; display: flex; align-items: center; gap: .55rem; padding: .25rem .45rem .25rem .3rem; border: 1px solid transparent; border-radius: .45rem; background: transparent; color: $label; font: 600 .82rem $font-ui; cursor: pointer; transition: border-color 160ms ease, background-color 160ms ease; }
 .app-account__trigger:hover, .app-account__trigger[aria-expanded='true'] { border-color: $border; background: $card; }
-.app-account__avatar { width: 29px; height: 29px; display: grid; flex: 0 0 auto; place-items: center; border: 1px solid #3c424b; border-radius: 50%; background: #242830; color: $foreground; font-size: .72rem; }
+.app-account__trigger .user-avatar { border: 1px solid #3c424b; }
 .app-account__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-account__identity { display: flex; flex-direction: column; gap: .15rem; margin: -.1rem -.05rem .4rem; padding: .55rem .7rem .7rem; border-bottom: 1px solid $border; color: $foreground; font-size: .78rem; overflow-wrap: anywhere; }
 .app-account__identity span { color: $muted; font-size: .68rem; font-weight: 400; }

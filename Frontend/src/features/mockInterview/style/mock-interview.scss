@@ -4,7 +4,7 @@ $background: #0b0d0f; $foreground: #f2efe8; $accent: #e85d8a; $accent-dark: #c83
 .mock-main { width: 100%; max-width: 900px; margin: 0 auto; padding-top: clamp(3rem, 7vh, 5rem); }
 .mock-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid $border; }
 .mock-heading p { margin: 0 0 0.5rem; color: $accent; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
-.mock-heading h1 { margin: 0; font-family: $font-display; font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 400; letter-spacing: 0; }
+.mock-heading h1 { margin: 0; font-family: $font-display; font-size: var(--type-page-title); font-weight: 400; letter-spacing: 0; }
 .mock-heading > span { color: $muted; font-size: 0.78rem; }
 .mock-question, .mock-feedback, .mock-results { padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid $border; border-radius: 0.5rem; background: $card; }
 .mock-question > span { color: $accent; font-size: 0.7rem; font-weight: 700; }

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const tokenBlacklistModel = require('../models/blacklist.model')
+const userModel = require('../models/user.model')
 
 
 async function authUser(req,res,next) {
@@ -12,18 +13,18 @@ async function authUser(req,res,next) {
         })
     }
 
-    const isTokenBlacklisted = await tokenBlacklistModel.findOne({token})
-
-    if(isTokenBlacklisted) {
-        return res.status(401).json({
-            message: "token is blacklisted. please login again."
-        })
-    }
-
     try { 
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         if (decoded.tokenType && decoded.tokenType !== 'access') {
             return res.status(401).json({ message: "Invalid access token" })
+        }
+
+        const [ isTokenBlacklisted, user ] = await Promise.all([
+            tokenBlacklistModel.exists({ token }),
+            userModel.findById(decoded.id).select('+sessionVersion').lean()
+        ])
+        if (isTokenBlacklisted || !user || (decoded.sessionVersion || 0) !== (user.sessionVersion || 0)) {
+            return res.status(401).json({ message: 'Session is no longer valid. Please log in again.' })
         }
         req.user = decoded
 

@@ -46,7 +46,7 @@ $font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
         margin: 0;
         color: $foreground;
         font-family: $font-display;
-        font-size: clamp(3.5rem, 6vw, 5.5rem);
+        font-size: var(--type-page-title);
         font-weight: 400;
         line-height: 0.98;
         letter-spacing: 0;
@@ -55,7 +55,7 @@ $font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
         span { color: $accent; }
     }
 
-    &__copy { max-width: 600px; margin: 1.25rem 0 0; color: $muted; font-size: 0.94rem; line-height: 1.65; }
+    &__copy { max-width: 600px; margin: 1.25rem 0 0; color: $muted; font-size: var(--type-page-subtitle); line-height: 1.65; }
 }
 
 .dashboard-eyebrow,
@@ -63,7 +63,7 @@ $font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
 .dashboard-section-heading > div > p {
     margin: 0 0 0.7rem;
     color: $accent-bright;
-    font-size: 0.68rem;
+    font-size: var(--type-page-eyebrow);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -95,7 +95,7 @@ $font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
 .dashboard-tools{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.dashboard-streak,.dashboard-quick{display:flex;flex-direction:column;justify-content:space-between;gap:1.25rem;padding:1.25rem;border:1px solid $border;border-radius:.5rem;background:$card}.dashboard-streak p,.dashboard-quick>p{margin:0 0 .5rem;color:$accent;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em}.dashboard-streak strong{display:block;font-family:$font-display;font-size:2rem;font-weight:400}.dashboard-streak>div>span{color:$muted;font-size:.78rem}.dashboard-week{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem}.dashboard-week span{display:flex;flex-direction:column;gap:.35rem;color:$placeholder;font-size:.65rem;text-align:center}.dashboard-week b{padding:.35rem;border-radius:.25rem;background:#101216;color:$placeholder}.dashboard-week .active b{background:rgba($accent,.16);color:$accent}.dashboard-quick>div{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}.dashboard-quick button{min-height:42px;padding:.6rem;border:1px solid $border;border-radius:.4rem;background:transparent;color:$label;font:600 .75rem $font-ui;cursor:pointer}.dashboard-quick button:hover{border-color:$accent;color:$foreground}
 
 .dashboard-section-heading {
-    h2 { margin: 0; color: $foreground; font-family: $font-display; font-size: 2.25rem; font-weight: 400; letter-spacing: 0; }
+    h2 { margin: 0; color: $foreground; font-family: $font-display; font-size: var(--type-section-title); font-weight: 400; letter-spacing: 0; }
 
     &--row {
         display: flex;
@@ -131,7 +131,7 @@ $font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
         background: $card;
     }
 
-    strong { color: $foreground; font-family: $font-display; font-size: 2.5rem; font-weight: 400; letter-spacing: 0; }
+    strong { color: $foreground; font-family: $font-display; font-size: var(--type-metric); font-weight: 400; letter-spacing: 0; }
     span { color: $muted; font-size: 0.8rem; }
 }
 
@@ -200,7 +200,7 @@ $font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
     .dashboard-page { padding: 1.1rem 1rem 2.5rem; }
     .dashboard-main { gap: 3rem; padding-top: 3.5rem; }
     .dashboard-hero { gap: 2rem; }
-    .dashboard-hero h1 { font-size: clamp(2.8rem, 14vw, 4rem); }
+    .dashboard-hero h1 { font-size: var(--type-page-title); }
     .dashboard-primary { width: 100%; }
     .dashboard-stats { grid-template-columns: 1fr; }
     .dashboard-stats article { min-height: 110px; }

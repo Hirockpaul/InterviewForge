@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { useAuth } from '../../features/auth/hooks/useAuth'
+import UserAvatar from '../common/UserAvatar'
 import './app-header.scss'
 
 const practiceItems = [
+    { label: 'Coding Practice', description: 'Write and run code', to: '/coding-practice' },
     { label: 'MCQ', description: 'Test your knowledge', to: '/mcq' },
     { label: 'Technical Questions', description: 'Build topic confidence', to: '/focused-practice' },
     { label: 'Mock Interview', description: 'Practice from an interview plan', to: '/interviews' }
@@ -19,9 +21,8 @@ const AppHeader = () => {
     const [ mobileOpen, setMobileOpen ] = useState(false)
     const [ openMenu, setOpenMenu ] = useState(null)
     const username = user?.username || user?.email || 'Account'
-    const initial = username.trim().charAt(0).toUpperCase() || 'U'
     const isActive = (route) => pathname === route || (route !== '/dashboard' && pathname.startsWith(`${route}/`))
-    const practiceActive = [ '/mcq', '/focused-practice', '/mock-interview' ].some(isActive)
+    const practiceActive = [ '/coding-practice', '/mcq', '/focused-practice', '/mock-interview' ].some(isActive)
 
     useEffect(() => {
         const closeOnOutsideClick = (event) => {
@@ -78,14 +79,13 @@ const AppHeader = () => {
 
                 <div className={`app-dropdown app-account ${openMenu === 'account' ? 'is-open' : ''}`}>
                     <button className='app-account__trigger' type='button' aria-expanded={openMenu === 'account'} aria-haspopup='menu' onClick={() => toggleMenu('account')}>
-                        <span className='app-account__avatar' aria-hidden='true'>{initial}</span>
+                        <UserAvatar style={user?.avatarStyle} seed={user?.avatarSeed || username} size={29} alt='' />
                         <span className='app-account__name'>{username}</span>
                         <Chevron />
                     </button>
                     <div className='app-dropdown__menu app-account__menu' role='menu'>
                         <div className='app-account__identity'><strong>{username}</strong>{user?.username && user?.email && <span>{user.email}</span>}</div>
-                        <button type='button' role='menuitem' disabled title='Profile page is not available yet'>Profile <small>Coming soon</small></button>
-                        <button type='button' role='menuitem' disabled title='Settings page is not available yet'>Settings <small>Coming soon</small></button>
+                        <Link role='menuitem' to='/profile' onClick={closeNavigation}>Profile</Link>
                         <button type='button' role='menuitem' className='app-account__logout' onClick={logout} disabled={isLoggingOut}>{isLoggingOut ? 'Logging out...' : 'Logout'}</button>
                     </div>
                 </div>

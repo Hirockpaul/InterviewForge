@@ -7,7 +7,7 @@ $success: #35d06f; $warning: #e8a93a; $font-display: 'DM Serif Display', 'Anthro
 .interview-page { min-height: 100svh; padding: 1.5rem clamp(1rem, 4vw, 4rem) 4rem; overflow-x: hidden; background: $background; color: $text; font-family: $font-ui; }
 .report-masthead { width: 100%; max-width: 1400px; display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; margin: 0 auto; padding: clamp(3.5rem, 7vh, 5.5rem) 0 2rem; }
 .report-masthead p { margin: 0 0 0.55rem; color: $accent; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
-.report-masthead h1 { max-width: 760px; margin: 0; font-family: $font-display; font-size: clamp(2.75rem, 5vw, 4.75rem); font-weight: 400; line-height: 1.03; letter-spacing: 0; }
+.report-masthead h1 { max-width: 760px; margin: 0; font-family: $font-display; font-size: var(--type-page-title); font-weight: 400; line-height: 1.03; letter-spacing: 0; }
 .report-masthead > span { padding-bottom: 0.4rem; color: $text-muted; font-size: 0.76rem; }
 
 .interview-layout { width: 100%; max-width: 1400px; display: grid; grid-template-columns: 230px minmax(0, 1fr) 250px; margin: 0 auto; border-top: 1px solid $border; border-bottom: 1px solid $border; background: $surface; }

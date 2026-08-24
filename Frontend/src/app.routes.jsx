@@ -17,6 +17,10 @@ import FocusedPracticeReport from './features/focusedPractice/pages/FocusedPract
 import McqCreate from './features/mcq/pages/McqCreate'
 import McqSession from './features/mcq/pages/McqSession'
 import McqResult from './features/mcq/pages/McqResult'
+import CodingWorkspace from './features/coding/pages/CodingWorkspace'
+import CodingPractice from './features/coding/pages/CodingPractice'
+import CodingTopic from './features/coding/pages/CodingTopic'
+import Profile from './features/profile/pages/Profile'
 
 
 export const router = createBrowserRouter([
@@ -35,6 +39,10 @@ export const router = createBrowserRouter([
     {
         path: "/dashboard",
         element: <Protected><Dashboard /></Protected>
+    },
+    {
+        path: "/profile",
+        element: <Protected><Profile /></Protected>
     },
     {
         path: "/interviews/create",
@@ -107,5 +115,21 @@ export const router = createBrowserRouter([
     {
         path: '/mcq/:id/result',
         element: <Protected><McqResult /></Protected>
+    },
+    {
+        path: '/coding-practice',
+        element: <Protected><CodingPractice /></Protected>
+    },
+    {
+        path: '/coding-practice/workspace',
+        element: <Protected><CodingWorkspace /></Protected>
+    },
+    {
+        path: '/coding-practice/problem/:problemId',
+        element: <Protected><CodingWorkspace /></Protected>
+    },
+    {
+        path: '/coding-practice/:topic',
+        element: <Protected><CodingTopic /></Protected>
     }
 ]);

@@ -67,3 +67,8 @@ export async function getMe() {
   }
     
 }
+
+export async function updateProfile(payload) {
+  const response = await api.patch('/api/auth/profile', payload)
+  return response.data
+}

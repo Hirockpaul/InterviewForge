@@ -38,5 +38,6 @@ authRoutes.post('/logout', authController.logoutUserController)
  * @access private
  */
 authRoutes.get('/get-me', authMiddleware.authUser, authController.getMeController)
+authRoutes.patch('/profile', authMiddleware.authUser, authController.updateProfileController)
 
 module.exports = authRoutes

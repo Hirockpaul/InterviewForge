@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { AuthContext } from "../auth-context";
-import { login, loginWithGoogle, register, logout } from "../services/auth.api";
+import { login, loginWithGoogle, register, logout, updateProfile } from "../services/auth.api";
 
 
 
@@ -54,5 +54,11 @@ export const useAuth = () => {
         }
     }
 
-    return { user, loading, handleRegister, handleLogin, handleGoogleLogin, handleLogout }
+    const handleProfileUpdate = async (profile) => {
+        const data = await updateProfile(profile)
+        setUser(data.user)
+        return data.user
+    }
+
+    return { user, loading, handleRegister, handleLogin, handleGoogleLogin, handleLogout, handleProfileUpdate }
 }
