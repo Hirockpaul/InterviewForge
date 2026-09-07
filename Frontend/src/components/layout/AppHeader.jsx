@@ -1,97 +1,47 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { useAuth } from '../../features/auth/hooks/useAuth'
 import UserAvatar from '../common/UserAvatar'
+import { FiBarChart2, FiBookmark, FiBriefcase, FiChevronLeft, FiChevronRight, FiCode, FiFileText, FiGrid, FiHelpCircle, FiList, FiLogOut, FiMenu, FiSearch, FiSettings, FiTarget, FiX } from 'react-icons/fi'
 import './app-header.scss'
 
-const practiceItems = [
-    { label: 'Coding Practice', description: 'Write and run code', to: '/coding-practice' },
-    { label: 'MCQ', description: 'Test your knowledge', to: '/mcq' },
-    { label: 'Technical Questions', description: 'Build topic confidence', to: '/focused-practice' },
-    { label: 'Mock Interview', description: 'Practice from an interview plan', to: '/interviews' }
+const groups = [
+    { label: 'Main', items: [ { label: 'Dashboard', to: '/dashboard', icon: FiGrid } ] },
+    { label: 'Career', items: [ { label: 'Search jobs', to: '/jobs', exact: true, icon: FiSearch }, { label: 'Saved jobs', to: '/jobs/saved', icon: FiBookmark }, { label: 'Applications', to: '/jobs/applications', icon: FiBriefcase } ] },
+    { label: 'Preparation', items: [
+        { label: 'Interviews', to: '/interviews', icon: FiTarget },
+        { label: 'Technical questions', to: '/focused-practice', icon: FiHelpCircle },
+        { label: 'Coding practice', to: '/coding-practice', icon: FiCode },
+        { label: 'MCQ practice', to: '/mcq', icon: FiList },
+        { label: 'Project questions', to: '/project-questions', icon: FiFileText },
+        { label: 'Question bank', to: '/question-bank', icon: FiBookmark }
+    ] },
+    { label: 'Insights', items: [ { label: 'Progress', to: '/progress', icon: FiBarChart2 } ] }
 ]
-
-const Chevron = () => <svg className='app-chevron' viewBox='0 0 12 12' aria-hidden='true'><path d='m2.5 4.5 3.5 3 3.5-3' /></svg>
 
 const AppHeader = () => {
     const { user, handleLogout } = useAuth()
     const { pathname } = useLocation()
-    const headerRef = useRef(null)
-    const [ isLoggingOut, setIsLoggingOut ] = useState(false)
+    const [ collapsed, setCollapsed ] = useState(() => localStorage.getItem('if-sidebar-collapsed') === 'true')
     const [ mobileOpen, setMobileOpen ] = useState(false)
-    const [ openMenu, setOpenMenu ] = useState(null)
+    const [ loggingOut, setLoggingOut ] = useState(false)
     const username = user?.username || user?.email || 'Account'
-    const isActive = (route) => pathname === route || (route !== '/dashboard' && pathname.startsWith(`${route}/`))
-    const practiceActive = [ '/coding-practice', '/mcq', '/focused-practice', '/mock-interview' ].some(isActive)
 
-    useEffect(() => {
-        const closeOnOutsideClick = (event) => {
-            if (!headerRef.current?.contains(event.target)) {
-                setOpenMenu(null)
-                setMobileOpen(false)
-            }
-        }
-        const closeOnEscape = (event) => {
-            if (event.key === 'Escape') {
-                setOpenMenu(null)
-                setMobileOpen(false)
-            }
-        }
-        document.addEventListener('pointerdown', closeOnOutsideClick)
-        document.addEventListener('keydown', closeOnEscape)
-        return () => {
-            document.removeEventListener('pointerdown', closeOnOutsideClick)
-            document.removeEventListener('keydown', closeOnEscape)
-        }
-    }, [])
+    useEffect(() => { document.body.classList.toggle('if-sidebar-collapsed', collapsed); localStorage.setItem('if-sidebar-collapsed', collapsed); return () => document.body.classList.remove('if-sidebar-collapsed') }, [ collapsed ])
+    useEffect(() => { const close = (event) => event.key === 'Escape' && setMobileOpen(false); document.addEventListener('keydown', close); return () => document.removeEventListener('keydown', close) }, [])
 
-    const toggleMenu = (menu) => setOpenMenu((current) => current === menu ? null : menu)
-    const closeNavigation = () => { setOpenMenu(null); setMobileOpen(false) }
-    const logout = async () => {
-        setIsLoggingOut(true)
-        try { await handleLogout() } finally { setIsLoggingOut(false) }
-    }
+    const active = (item) => item.exact ? pathname === item.to : pathname === item.to || pathname.startsWith(`${item.to}/`) || item.aliases?.some((path) => pathname.startsWith(path))
+    const logout = async () => { setLoggingOut(true); try { await handleLogout() } finally { setLoggingOut(false) } }
 
-    return (
-        <header className='app-header' ref={headerRef}>
-            <Link className='app-brand' to='/dashboard' aria-label='InterviewForge dashboard' onClick={closeNavigation}>
-                <span className='app-brand__mark' aria-hidden='true'>IF</span>
-                <span>InterviewForge</span>
-            </Link>
-
-            <button className='app-menu-toggle' type='button' aria-label='Toggle navigation' aria-expanded={mobileOpen} onClick={() => { setMobileOpen((open) => !open); setOpenMenu(null) }}>
-                <span /><span /><span />
-            </button>
-
-            <div className={`app-header__content ${mobileOpen ? 'is-open' : ''}`}>
-                <nav className='app-nav' aria-label='Main navigation'>
-                    <Link className={isActive('/dashboard') ? 'is-active' : ''} aria-current={isActive('/dashboard') ? 'page' : undefined} to='/dashboard' onClick={closeNavigation}>Dashboard</Link>
-                    <Link className={isActive('/interviews') ? 'is-active' : ''} aria-current={isActive('/interviews') ? 'page' : undefined} to='/interviews' onClick={closeNavigation}>Interviews</Link>
-                    <div className={`app-dropdown ${openMenu === 'practice' ? 'is-open' : ''}`}>
-                        <button className={`app-nav__trigger ${practiceActive ? 'is-active' : ''}`} type='button' aria-expanded={openMenu === 'practice'} aria-haspopup='menu' onClick={() => toggleMenu('practice')}>Practice <Chevron /></button>
-                        <div className='app-dropdown__menu app-dropdown__menu--practice' role='menu'>
-                            {practiceItems.map((item) => <Link key={item.label} className={isActive(item.to) ? 'is-active' : ''} role='menuitem' to={item.to} onClick={closeNavigation}><span>{item.label}</span><small>{item.description}</small></Link>)}
-                        </div>
-                    </div>
-                    <Link className={isActive('/question-bank') ? 'is-active' : ''} aria-current={isActive('/question-bank') ? 'page' : undefined} to='/question-bank' onClick={closeNavigation}>Question Bank</Link>
-                    <Link className={isActive('/progress') ? 'is-active' : ''} aria-current={isActive('/progress') ? 'page' : undefined} to='/progress' onClick={closeNavigation}>Progress</Link>
-                </nav>
-
-                <div className={`app-dropdown app-account ${openMenu === 'account' ? 'is-open' : ''}`}>
-                    <button className='app-account__trigger' type='button' aria-expanded={openMenu === 'account'} aria-haspopup='menu' onClick={() => toggleMenu('account')}>
-                        <UserAvatar style={user?.avatarStyle} seed={user?.avatarSeed || username} size={29} alt='' />
-                        <span className='app-account__name'>{username}</span>
-                        <Chevron />
-                    </button>
-                    <div className='app-dropdown__menu app-account__menu' role='menu'>
-                        <div className='app-account__identity'><strong>{username}</strong>{user?.username && user?.email && <span>{user.email}</span>}</div>
-                        <Link role='menuitem' to='/profile' onClick={closeNavigation}>Profile</Link>
-                        <button type='button' role='menuitem' className='app-account__logout' onClick={logout} disabled={isLoggingOut}>{isLoggingOut ? 'Logging out...' : 'Logout'}</button>
-                    </div>
-                </div>
-            </div>
-        </header>
-    )
+    return <>
+        <button className='mobile-nav-toggle' type='button' aria-label='Open navigation' aria-expanded={mobileOpen} onClick={() => setMobileOpen(true)}><FiMenu aria-hidden='true' /></button>
+        {mobileOpen && <button className='side-nav-backdrop' type='button' aria-label='Close navigation' onClick={() => setMobileOpen(false)} />}
+        <aside className={`app-header ${collapsed ? 'is-collapsed' : ''} ${mobileOpen ? 'is-mobile-open' : ''}`} aria-label='Application sidebar'>
+            <div className='side-nav__brand-row'><Link className='app-brand' to='/dashboard' title={collapsed ? 'InterviewForge' : undefined}><span className='app-brand__mark'>IF</span><span className='app-brand__name'>InterviewForge</span></Link><button className='side-nav__mobile-close' type='button' aria-label='Close navigation' onClick={() => setMobileOpen(false)}><FiX aria-hidden='true' /></button></div>
+            <nav className='side-nav' aria-label='Primary navigation' onClick={(event) => { if (event.target.closest('a')) setMobileOpen(false) }}>{groups.map((group) => <section className='side-nav__group' key={group.label}><p>{group.label}</p>{group.items.map((item) => { const Icon = item.icon; return <Link key={item.to} to={item.to} className={active(item) ? 'is-active' : ''} aria-current={active(item) ? 'page' : undefined} title={collapsed ? item.label : undefined}><span className='side-nav__icon' aria-hidden='true'><Icon /></span><span className='side-nav__label'>{item.label}</span></Link> })}</section>)}</nav>
+            <div className='side-nav__footer'><Link className={pathname === '/profile' ? 'is-active' : ''} to='/profile' title={collapsed ? 'Settings' : undefined}><span className='side-nav__icon' aria-hidden='true'><FiSettings /></span><span className='side-nav__label'>Settings</span></Link><div className='side-nav__account'><UserAvatar style={user?.avatarStyle} seed={user?.avatarSeed || username} size={34} alt='' /><span><strong>{username}</strong><small>{user?.email || 'Your profile'}</small></span><button type='button' onClick={logout} disabled={loggingOut} title='Log out' aria-label='Log out'><FiLogOut aria-hidden='true' /></button></div><button className='side-nav__collapse' type='button' onClick={() => setCollapsed((value) => !value)} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}><span aria-hidden='true'>{collapsed ? <FiChevronRight /> : <FiChevronLeft />}</span><span className='side-nav__label'>Collapse</span></button></div>
+        </aside>
+    </>
 }
 
 export default AppHeader

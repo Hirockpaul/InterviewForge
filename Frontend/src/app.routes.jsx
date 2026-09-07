@@ -21,6 +21,10 @@ import CodingWorkspace from './features/coding/pages/CodingWorkspace'
 import CodingPractice from './features/coding/pages/CodingPractice'
 import CodingTopic from './features/coding/pages/CodingTopic'
 import Profile from './features/profile/pages/Profile'
+import Jobs from './features/jobs/pages/Jobs'
+import JobDetails from './features/jobs/pages/JobDetails'
+import SavedJobs from './features/jobs/pages/SavedJobs'
+import Applications from './features/jobs/pages/Applications'
 
 
 export const router = createBrowserRouter([
@@ -43,6 +47,22 @@ export const router = createBrowserRouter([
     {
         path: "/profile",
         element: <Protected><Profile /></Protected>
+    },
+    {
+        path: "/jobs",
+        element: <Protected><Jobs /></Protected>
+    },
+    {
+        path: "/jobs/:id",
+        element: <Protected><JobDetails /></Protected>
+    },
+    {
+        path: "/jobs/saved",
+        element: <Protected><SavedJobs /></Protected>
+    },
+    {
+        path: "/jobs/applications",
+        element: <Protected><Applications /></Protected>
     },
     {
         path: "/interviews/create",

@@ -5,12 +5,13 @@ import CodeEditor from '../components/CodeEditor'
 import OutputPanel from '../components/OutputPanel'
 import { LANGUAGES } from '../constants/languages'
 import { getCodingProblem, runCode } from '../services/coding.api'
+import { normalizeCode } from '../utils/normalizeCode'
 import '../styles/coding-workspace.scss'
 
 const savedCodeKey = (problemId, language) => `interviewforge:code:${problemId || 'workspace'}:${language}`
 
 const genericCode = () => Object.fromEntries(Object.entries(LANGUAGES).map(([ key, config ]) => [
-    key, localStorage.getItem(savedCodeKey(null, key)) ?? config.starterCode
+    key, normalizeCode(localStorage.getItem(savedCodeKey(null, key)) ?? config.starterCode)
 ]))
 
 const CodingWorkspace = () => {
@@ -36,7 +37,7 @@ const CodingWorkspace = () => {
                 setProblemError(null)
                 setCodeByLanguage(Object.fromEntries(Object.entries(LANGUAGES).map(([ key, config ]) => [
                     key,
-                    localStorage.getItem(savedCodeKey(problemId, key)) ?? loadedProblem.starterCode?.[key] ?? config.starterCode
+                    normalizeCode(localStorage.getItem(savedCodeKey(problemId, key)) ?? loadedProblem.starterCode?.[key] ?? config.starterCode)
                 ])))
             })
             .catch(() => { if (active) setProblemError({ problemId, message: 'This coding problem could not be loaded.' }) })
@@ -54,7 +55,7 @@ const CodingWorkspace = () => {
     }
 
     const resetCode = () => {
-        updateCode(selectedLanguage.starterCode)
+        updateCode(normalizeCode(problem?.starterCode?.[language] ?? selectedLanguage.starterCode))
         setResult(null)
     }
 

@@ -70,7 +70,17 @@ Requirements:
         }
     })
 
-    return generatedProblemsSchema.parse(JSON.parse(response.text)).problems
+    const generated = generatedProblemsSchema.parse(JSON.parse(response.text)).problems
+
+    return generated.map((problem) => ({
+        ...problem,
+        starterCode: Object.fromEntries(Object.entries(problem.starterCode).map(([ language, code ]) => [
+            language,
+            code.includes('\\n') && !code.includes('\n')
+                ? code.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n').replace(/\\t/g, '\t')
+                : code
+        ]))
+    }))
 }
 
 module.exports = { generateCodingProblems, generatedProblemSchema, generatedProblemsSchema }

@@ -5,14 +5,22 @@ import { useAuth } from '../../auth/hooks/useAuth'
 import { useInterview } from '../../interview/hooks/useInterview'
 import '../style/dashboard.scss'
 import { getStreak } from '../../preparation/services/preparation.api'
+import { getRecommendedJobs, prepareJob } from '../../jobs/services/jobs.api'
 
 const Dashboard = () => {
     const navigate = useNavigate()
     const { user } = useAuth()
     const { loading, reports } = useInterview()
     const [ streak, setStreak ] = useState(null)
+    const [ recommended, setRecommended ] = useState({ jobs: [], missingProfile: false })
 
     useEffect(() => { getStreak().then((data) => setStreak(data.streak)).catch(() => setStreak(null)) }, [])
+    useEffect(() => { getRecommendedJobs().then(setRecommended).catch(() => setRecommended({ jobs: [], missingProfile: false })) }, [])
+
+    const prepareRecommended = async (job) => {
+        try { const data = await prepareJob(job._id); navigate(`/interviews/${data.interviewReport._id}`) }
+        catch { navigate('/interviews/create', { state: { jobDescription: job.description || '' } }) }
+    }
 
     const totalPlans = reports.length
     const highMatches = reports.filter((report) => report.matchScore >= 80).length
@@ -23,7 +31,7 @@ const Dashboard = () => {
     const firstName = user?.username?.split(/[\s_-]/)[0] || 'there'
 
     if (loading) {
-        return <main className='dashboard-loading'><p>Preparing your dashboard...</p></main>
+        return <div className='dashboard-page'><AppHeader /><main className='dashboard-main dashboard-loading' aria-label='Loading dashboard'><span className='dashboard-loading__hero' /><div className='dashboard-loading__metrics'><span /><span /><span /></div><div className='dashboard-loading__panels'><span /><span /></div></main></div>
     }
 
     return (
@@ -58,9 +66,9 @@ const Dashboard = () => {
                 <section className='dashboard-tools' aria-label='Practice shortcuts'>
                     <article className='dashboard-streak'>
                         <div><p>Interview streak</p><strong>🔥 {streak?.currentStreak || 0} day{streak?.currentStreak === 1 ? '' : 's'}</strong><span>{streak?.currentStreak ? 'Keep your preparation going.' : 'Complete meaningful practice to begin.'}</span></div>
-                        <div className='dashboard-week'>{(streak?.week || []).map((day) => <span key={day.date} className={day.active ? 'active' : ''}>{day.label}<b>{day.active ? '✓' : '—'}</b></span>)}</div>
+                        <div className='dashboard-week'>{(streak?.week?.length ? streak.week : [ 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' ].map((label) => ({ label, date: label, active: false }))).map((day) => <span key={day.date} className={day.active ? 'active' : ''}>{day.label}<b aria-label={day.active ? 'Practice completed' : 'No practice completed'}>{day.active ? '✓' : '—'}</b></span>)}</div>
                     </article>
-                    <article className='dashboard-quick'><p>Quick practice</p><div><button onClick={() => navigate('/focused-practice')}>Technical questions</button><button onClick={() => navigate('/mcq')}>MCQ practice</button><button onClick={() => navigate('/question-bank')}>Saved questions</button><button onClick={() => navigate('/project-questions')}>Project questions</button><button onClick={() => navigate('/introductions')}>Tell me about yourself</button></div></article>
+                    <article className='dashboard-quick'><p>Quick practice</p><div><button onClick={() => navigate('/focused-practice')}>Technical questions</button><button onClick={() => navigate('/coding-practice')}>Coding practice</button><button onClick={() => navigate('/mcq')}>MCQ practice</button><button onClick={() => navigate('/question-bank')}>Saved questions</button><button onClick={() => navigate('/project-questions')}>Project questions</button><button onClick={() => navigate('/introductions')}>Tell me about yourself</button></div></article>
                 </section>
 
                 <section className='dashboard-recent' aria-labelledby='recent-title'>
@@ -92,6 +100,11 @@ const Dashboard = () => {
                             <button type='button' onClick={() => navigate('/interviews/create')}>Create your first plan</button>
                         </div>
                     )}
+                </section>
+
+                <section className='dashboard-jobs' aria-labelledby='recommended-jobs-title'>
+                    <div className='dashboard-section-heading dashboard-section-heading--row'><div><p>Based on your profile</p><h2 id='recommended-jobs-title'>Recommended jobs</h2></div><button type='button' onClick={() => navigate('/jobs')}>Explore all jobs <span aria-hidden='true'>→</span></button></div>
+                    {recommended.jobs.length > 0 ? <div className='dashboard-job-list'>{recommended.jobs.map((job) => <article key={job._id}><div><h3>{job.title}</h3><p>{job.company}</p><span>{job.location?.display || job.locations?.[0] || 'Location not provided'}{job.remoteType ? ` · ${job.remoteType}` : ''}</span></div><div><button type='button' onClick={() => navigate(`/jobs/${job._id}`)}>View job</button><button type='button' onClick={() => prepareRecommended(job)}>Prepare →</button></div></article>)}</div> : <div className='dashboard-empty'><h3>{recommended.missingProfile ? 'Complete your candidate profile' : 'No recommendations yet'}</h3><p>{recommended.missingProfile ? 'Create an interview plan with your resume or self-description to unlock relevant job recommendations.' : 'We will show current roles here as they become available.'}</p><button type='button' onClick={() => navigate(recommended.missingProfile ? '/interviews/create' : '/jobs')}>{recommended.missingProfile ? 'Add candidate information' : 'Explore jobs'}</button></div>}
                 </section>
             </main>
         </div>

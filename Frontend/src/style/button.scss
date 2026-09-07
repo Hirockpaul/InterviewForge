@@ -3,13 +3,14 @@
     outline: none;
     padding-inline: 1.5rem;
     padding-block: 0.75rem;
-    border-radius: 1rem;
+    min-height: 42px;
+    border-radius: var(--if-radius-sm, .4rem);
     cursor: pointer;
-    transition: transform 0.3s ease-in-out;
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
 .button.primary-button {
-    background-color: #e1034d;
+    background-color: var(--if-accent-strong, #c83f69);
     color: white;
 }
 
@@ -19,5 +20,5 @@
 }
 
 .button:active {
-    transform: scale(1.1);
+    transform: translateY(1px);
 }

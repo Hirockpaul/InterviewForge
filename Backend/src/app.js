@@ -48,6 +48,7 @@ const preparationRouter = require('./routes/preparation.routes')
 const focusedPracticeRouter = require('./routes/focusedPractice.routes')
 const mcqRouter = require('./routes/mcq.routes')
 const codingRouter = require('./routes/coding.routes')
+const jobsRouter = require('./routes/jobs.routes')
 
 
 /* using  all the routes here */
@@ -59,6 +60,7 @@ app.use('/api/preparation', preparationRouter)
 app.use('/api/focused-practice', focusedPracticeRouter)
 app.use('/api/mcq', mcqRouter)
 app.use('/api/coding', codingRouter)
+app.use('/api/jobs', jobsRouter)
 
 app.use((error, req, res, next) => {
     console.error('Unhandled request error:', error.message)

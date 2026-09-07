@@ -1,13 +1,14 @@
 import { useState, useRef } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import AppHeader from '../../../components/layout/AppHeader.jsx'
 
 const Home = () => {
 
     const { loading, generateReport,reports } = useInterview()
-    const [ jobDescription, setJobDescription ] = useState("")
+    const location = useLocation()
+    const [ jobDescription, setJobDescription ] = useState(location.state?.jobDescription || "")
     const [ selfDescription, setSelfDescription ] = useState("")
     const [ resumeFile, setResumeFile ] = useState(null)
     const [ resumeError, setResumeError ] = useState("")

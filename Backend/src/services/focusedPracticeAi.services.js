@@ -11,6 +11,14 @@ const generatedQuestionSchema = z.object({
     intent: z.string().trim().min(8).max(1000), expectedPoints: z.array(z.string().trim().min(1)).min(2).max(12)
 })
 const generationSchema = z.object({ questions: z.array(generatedQuestionSchema).max(36) })
+// Gemini's structured-output endpoint rejects some JSON Schema validation
+// keywords (notably nested min/max length and item constraints). Keep the
+// strict schema above for local validation and send this structural schema to
+// the provider.
+const generationResponseSchema = z.object({ questions: z.array(z.object({
+    question: z.string(), difficulty: z.enum([ 'easy', 'medium', 'hard' ]), category: z.enum(categories),
+    subtopics: z.array(z.string()), skills: z.array(z.string()), intent: z.string(), expectedPoints: z.array(z.string())
+})) })
 
 const evaluationSchema = z.object({
     questionId: z.string(), score: z.number().min(0).max(100), technicalAccuracy: z.number().min(0).max(100),
@@ -34,7 +42,7 @@ async function generateMissingQuestions({ canonicalTopic, displayTopic, mode, so
 Return exactly the requested count for each difficulty. Modes map to categories; mixed should use a relevant mix. Questions must be open-ended, unambiguous, relevant, and contain useful expected answer points. Never include facts not present in private context. If private context exists, ground project-specific questions only in it.
 Do not repeat these normalized existing questions: ${[ ...existingNormalized ].slice(0, 150).join(' | ')}
 ${privateContext}`,
-        config: { responseMimeType: 'application/json', responseJsonSchema: z.toJSONSchema(generationSchema) }
+        config: { responseMimeType: 'application/json', responseJsonSchema: z.toJSONSchema(generationResponseSchema) }
     })
     const parsed = generationSchema.parse(JSON.parse(response.text))
     const accepted = []
