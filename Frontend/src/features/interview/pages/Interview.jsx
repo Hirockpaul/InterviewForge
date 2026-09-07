@@ -19,9 +19,10 @@ const NAV_ITEMS = [
 // ── Sub-components ────────────────────────────────────────────────────────────
 const QuestionCard = ({ item, index, category, interviewPlanId, navigate }) => {
     const [ open, setOpen ] = useState(false)
+    const contentId = `${category}-question-${index + 1}`
     return (
         <div className='q-card'>
-            <button type='button' className='q-card__header' onClick={() => setOpen(o => !o)} aria-expanded={open}>
+            <button type='button' className='q-card__header' onClick={() => setOpen(o => !o)} aria-expanded={open} aria-controls={contentId}>
                 <span className='q-card__index'>Q{index + 1}</span>
                 <p className='q-card__question'>{item.question}</p>
                 <span className={`q-card__chevron ${open ? 'q-card__chevron--open' : ''}`}>
@@ -29,7 +30,7 @@ const QuestionCard = ({ item, index, category, interviewPlanId, navigate }) => {
                 </span>
             </button>
             {open && (
-                <div className='q-card__body'>
+                <div className='q-card__body' id={contentId}>
                     <div className='q-card__section'>
                         <span className='q-card__tag q-card__tag--intention'>Intention</span>
                         <p>{item.intention}</p>
@@ -118,7 +119,10 @@ const Interview = () => {
                     <p>Interview report</p>
                     <h1>{report.title}</h1>
                 </div>
-                <span>Personalized preparation strategy</span>
+                <div className='report-masthead__context'>
+                    <span>Preparation</span>
+                    <strong>Personalized strategy</strong>
+                </div>
             </header>
             <div className='interview-layout'>
 
@@ -126,7 +130,7 @@ const Interview = () => {
                 <nav className='interview-nav'>
                     <div className="nav-content">
                         <p className='interview-nav__label'>Sections</p>
-                        {NAV_ITEMS.map(item => {
+                        {NAV_ITEMS.map((item, index) => {
                             const Icon = item.icon
                             return (
                             <button
@@ -134,20 +138,22 @@ const Interview = () => {
                                 className={`interview-nav__item ${activeNav === item.id ? 'interview-nav__item--active' : ''}`}
                                 onClick={() => setActiveNav(item.id)}
                             >
+                                <span className='interview-nav__number'>0{index + 1}</span>
                                 <span className='interview-nav__icon'><Icon aria-hidden='true' /></span>
-                                {item.label}
+                                <span>{item.label}</span>
                             </button>
                             )
                         })}
                     </div>
                     <div className='interview-nav__actions'>
+                    <p className='interview-nav__label'>Actions</p>
                     <button type='button' className='mock-start-btn' onClick={startMock} disabled={isStartingMock}>
                         <LuSparkles aria-hidden='true' />
                         {isStartingMock ? 'Starting interview...' : 'Start Mock Interview'}
                     </button>
                     <button
                         onClick={() => { getResumePdf(interviewId) }}
-                        className='button primary-button' >
+                        className='button report-download-btn' >
                         <LuDownload aria-hidden='true' />
                         Download Resume
                     </button>
@@ -166,9 +172,9 @@ const Interview = () => {
                                 <span className='content-header__count'>{report.technicalQuestions.length} questions</span>
                             </div>
                             <div className='q-list'>
-                                {report.technicalQuestions.map((q, i) => (
+                                {report.technicalQuestions.length ? report.technicalQuestions.map((q, i) => (
                                     <QuestionCard key={i} item={q} index={i} category='technical' interviewPlanId={interviewId} navigate={navigate} />
-                                ))}
+                                )) : <p className='report-empty'>No technical questions were generated for this report.</p>}
                             </div>
                         </section>
                     )}
@@ -180,9 +186,9 @@ const Interview = () => {
                                 <span className='content-header__count'>{report.behavioralQuestions.length} questions</span>
                             </div>
                             <div className='q-list'>
-                                {report.behavioralQuestions.map((q, i) => (
+                                {report.behavioralQuestions.length ? report.behavioralQuestions.map((q, i) => (
                                     <QuestionCard key={i} item={q} index={i} category='behavioral' interviewPlanId={interviewId} navigate={navigate} />
-                                ))}
+                                )) : <p className='report-empty'>No behavioral questions were generated for this report.</p>}
                             </div>
                         </section>
                     )}
@@ -194,9 +200,9 @@ const Interview = () => {
                                 <span className='content-header__count'>{report.preparationPlan.length}-day plan</span>
                             </div>
                             <div className='roadmap-list'>
-                                {report.preparationPlan.map((day) => (
+                                {report.preparationPlan.length ? report.preparationPlan.map((day) => (
                                     <RoadMapDay key={day.day} day={day} />
-                                ))}
+                                )) : <p className='report-empty'>No preparation roadmap was generated for this report.</p>}
                             </div>
                         </section>
                     )}
@@ -206,6 +212,7 @@ const Interview = () => {
 
                 {/* ── Right Sidebar ── */}
                 <aside className='interview-sidebar'>
+                    <p className='interview-sidebar__eyebrow'>AI Analysis</p>
 
                     {/* Match Score */}
                     <div className='match-score'>
@@ -214,7 +221,7 @@ const Interview = () => {
                             <span className='match-score__value'>{report.matchScore}</span>
                             <span className='match-score__pct'>%</span>
                         </div>
-                        <p className='match-score__sub'>Strong match for this role</p>
+                        <p className='match-score__sub'>Profile alignment with this role</p>
                     </div>
 
                     <div className='sidebar-divider' />
@@ -223,13 +230,24 @@ const Interview = () => {
                     <div className='skill-gaps'>
                         <p className='skill-gaps__label'>Skill Gaps</p>
                         <div className='skill-gaps__list'>
-                            {report.skillGaps.map((gap, i) => (
-                                <span key={i} className={`skill-tag skill-tag--${gap.severity}`}>
-                                    {gap.skill}
-                                </span>
-                            ))}
+                            {report.skillGaps.length ? report.skillGaps.map((gap, i) => (
+                                <div key={i} className='skill-tag'>
+                                    <span>{gap.skill}</span>
+                                    <small>Priority: {gap.severity}</small>
+                                </div>
+                            )) : <p className='sidebar-empty'>No skill gaps identified.</p>}
                         </div>
                     </div>
+
+                    {report.preparationPlan.length > 0 && <>
+                        <div className='sidebar-divider' />
+                        <div className='next-steps'>
+                            <p className='skill-gaps__label'>Next Steps</p>
+                            <ol>
+                                {report.preparationPlan.slice(0, 3).map(day => <li key={day.day}><span>0{day.day}</span>{day.focus}</li>)}
+                            </ol>
+                        </div>
+                    </>}
 
                 </aside>
             </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import AppHeader from '../../../components/layout/AppHeader'
 import CodeEditor from '../components/CodeEditor'
@@ -23,6 +23,8 @@ const CodingWorkspace = () => {
     const [ result, setResult ] = useState(null)
     const [ isRunning, setIsRunning ] = useState(false)
     const [ fontSize, setFontSize ] = useState(20)
+    const [ problemPaneWidth, setProblemPaneWidth ] = useState(45)
+    const layoutRef = useRef(null)
     const selectedLanguage = LANGUAGES[language]
     const currentProblemError = problemError?.problemId === problemId ? problemError.message : ''
     const isProblemLoading = Boolean(problemId && String(problem?._id) !== problemId && !currentProblemError)
@@ -78,12 +80,42 @@ const CodingWorkspace = () => {
                 success: false,
                 output: '',
                 error: 'Code execution service is temporarily unavailable.',
-                status: 'api_error'
+                status: 'network_error'
             })
         } finally {
             setIsRunning(false)
         }
     }
+
+    useEffect(() => {
+        const runFromKeyboard = (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                event.preventDefault()
+                execute()
+            }
+        }
+        window.addEventListener('keydown', runFromKeyboard)
+        return () => window.removeEventListener('keydown', runFromKeyboard)
+    })
+
+    const resizeProblemPane = useCallback((event) => {
+        if (event.button !== 0 || !layoutRef.current) return
+        event.preventDefault()
+        const layout = layoutRef.current
+        const move = (pointerEvent) => {
+            const bounds = layout.getBoundingClientRect()
+            const nextWidth = ((pointerEvent.clientX - bounds.left) / bounds.width) * 100
+            setProblemPaneWidth(Math.min(58, Math.max(35, nextWidth)))
+        }
+        const stop = () => {
+            document.removeEventListener('pointermove', move)
+            document.removeEventListener('pointerup', stop)
+            document.body.classList.remove('is-resizing-code-panes')
+        }
+        document.body.classList.add('is-resizing-code-panes')
+        document.addEventListener('pointermove', move)
+        document.addEventListener('pointerup', stop)
+    }, [])
 
     return (
         <div className='coding-page'>
@@ -99,7 +131,11 @@ const CodingWorkspace = () => {
 
                 {currentProblemError && <div className='coding-notice coding-notice--error'>{currentProblemError} <Link to='/coding-practice'>Browse problems</Link></div>}
                 {isProblemLoading ? <div className='coding-notice'>Loading problem workspace...</div> : !currentProblemError && (
-                    <div className={problem ? 'coding-problem-layout' : ''}>
+                    <div
+                        className={problem ? 'coding-problem-layout' : ''}
+                        ref={layoutRef}
+                        style={problem ? { '--problem-pane-width': `${problemPaneWidth}%` } : undefined}
+                    >
                         {problem && (
                             <article className='coding-problem-detail'>
                                 <header className='coding-problem-detail__title'>
@@ -113,6 +149,7 @@ const CodingWorkspace = () => {
                                 <section><h2>Hints</h2><ol>{problem.hints.map((hint) => <li key={hint}>{hint}</li>)}</ol></section>
                             </article>
                         )}
+                        {problem && <div className='coding-pane-resizer' role='separator' aria-label='Resize problem and editor panes' aria-orientation='vertical' onPointerDown={resizeProblemPane} />}
                         <div className='coding-ide'>
                             <section className='coding-workspace' aria-label='Code editor'>
                                 <div className='coding-workspace__bar'>
@@ -130,9 +167,10 @@ const CodingWorkspace = () => {
                                 <CodeEditor language={selectedLanguage.editorLanguage} value={codeByLanguage[language]} onChange={updateCode} fontSize={fontSize} />
                             </section>
 
-                            {(isRunning || result) && <OutputPanel result={result} isRunning={isRunning} />}
+                            <OutputPanel result={result} isRunning={isRunning} />
 
                             <div className='coding-actions coding-actions--footer'>
+                                <span className='coding-actions__shortcut'>Ctrl / ⌘ + Enter</span>
                                 <button type='button' onClick={execute} disabled={isRunning || !codeByLanguage[language].trim()}>
                                     {isRunning ? 'Running...' : 'Run Code'}
                                 </button>

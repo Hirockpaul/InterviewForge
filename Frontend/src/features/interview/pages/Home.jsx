@@ -13,6 +13,7 @@ const Home = () => {
     const [ resumeFile, setResumeFile ] = useState(null)
     const [ resumeError, setResumeError ] = useState("")
     const [ generationError, setGenerationError ] = useState("")
+    const [ generating, setGenerating ] = useState(false)
     const [ isDraggingResume, setIsDraggingResume ] = useState(false)
     const resumeInputRef = useRef()
 
@@ -61,14 +62,17 @@ const Home = () => {
         }
 
         try {
+            setGenerating(true)
             const data = await generateReport({ jobDescription, selfDescription, resumeFile })
             navigate(`/interviews/${data._id}`)
         } catch (error) {
             setGenerationError(error.message)
+        } finally {
+            setGenerating(false)
         }
     }
 
-    if (loading) {
+    if (loading && !generating) {
         return (
             <main className='loading-screen'>
                 <h1>Loading your interview plan...</h1>
@@ -90,7 +94,7 @@ const Home = () => {
 
             {/* Main Card */}
             <div className='interview-card'>
-                <div className='interview-card__body'>
+                <div className='interview-card__body' aria-busy={generating}>
 
                     {/* Left Panel - Job Description */}
                     <div className='panel panel--left'>
@@ -199,9 +203,10 @@ const Home = () => {
                     </span>
                     <button
                         onClick={handleGenerateReport}
-                        className='generate-btn'>
+                        className='generate-btn'
+                        disabled={generating}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" /></svg>
-                        Generate My Interview Strategy
+                        {generating ? 'Generating your strategy…' : 'Generate My Interview Strategy'}
                     </button>
                 </div>
                 {generationError && <p className='generation-error' role='alert'>{generationError}</p>}

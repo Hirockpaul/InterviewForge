@@ -13,7 +13,7 @@ $font-ui: 'Delight', system-ui, sans-serif;
 $font-display: 'Denton', Georgia, 'Times New Roman', serif;
 
 .history-page { min-height: 100svh; padding: 1.5rem clamp(1.25rem, 4vw, 4rem) 4rem; overflow-x: hidden; background: $background; color: $foreground; font-family: $font-ui; }
-.history-main { width: 100%; max-width: 1150px; margin: 0 auto; padding-top: clamp(4rem, 8vh, 6rem); }
+.history-main { width: 100%; max-width: var(--if-content, 1400px); margin: 0 auto; padding-top: clamp(4rem, 8vh, 6rem); }
 .history-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; padding-bottom: 2.5rem; border-bottom: 1px solid $border; }
 .history-heading > div > p { margin: 0 0 0.65rem; color: $accent; font-size: var(--type-page-eyebrow); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
 .history-heading h1 { margin: 0; font-family: $font-display; font-size: var(--type-page-title); font-weight: 400; letter-spacing: 0; }
@@ -27,11 +27,11 @@ $font-display: 'Denton', Georgia, 'Times New Roman', serif;
 .history-error { padding: 0.75rem; border: 1px solid rgba(#c95b70, 0.35); border-radius: 0.4rem; background: rgba(#c95b70, 0.07); color: #d18b8b; font-size: 0.8rem; }
 .history-list { display: flex; flex-direction: column; gap: 0.85rem; margin: 0; padding: 0; list-style: none; }
 .history-card { display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: 1.25rem; border: 1px solid $border; border-radius: 0.5rem; background: $card; }
-.history-card__score { color: $accent; font-size: 0.72rem; font-weight: 700; }
-.history-card h2 { margin: 0.35rem 0; color: $foreground; font-size: 1rem; }
-.history-card p { margin: 0; color: $placeholder; font-size: 0.75rem; }
+.history-card__score { color: $accent; font-size: 0.82rem; font-weight: 700; }
+.history-card h2 { margin: 0.4rem 0; color: $foreground; font-size: 1.08rem; }
+.history-card p { margin: 0; color: $muted; font-size: 0.85rem; line-height: 1.45; }
 .history-card__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; }
-.history-card__actions button { min-height: 36px; padding: 0.45rem 0.65rem; border: 1px solid $border; border-radius: 0.35rem; background: transparent; color: $label; font: 600 0.72rem $font-ui; cursor: pointer; }
+.history-card__actions button { min-height: 38px; padding: 0.5rem 0.75rem; border: 1px solid $border; border-radius: 0.35rem; background: transparent; color: $label; font: 600 0.82rem $font-ui; cursor: pointer; }
 .history-card__actions button:hover { border-color: $border-hover; color: $foreground; }
 .history-card__actions .history-card__mock { border-color: $accent-dark; background: $accent-dark; color: #fff7fa; }
 .history-card__actions .history-card__mock:hover { border-color: $accent; background: $accent; color: #fff; }

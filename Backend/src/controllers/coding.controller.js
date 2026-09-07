@@ -4,6 +4,7 @@ const { CODING_LANGUAGES } = require('../config/codingLanguages')
 const { CODING_TOPIC_IDS } = require('../config/codingTopics')
 const codingProblemModel = require('../models/codingProblem.model')
 const codingService = require('../services/coding.services')
+const { normalizeStarterCode } = require('../services/codingAi.services')
 const mongoose = require('mongoose')
 
 const runCodeSchema = z.object({
@@ -95,6 +96,7 @@ async function problemController(req, res) {
     try {
         const problem = await codingProblemModel.findById(req.params.id).lean({ flattenMaps: true })
         if (!problem) return res.status(404).json({ message: 'Coding problem not found.' })
+        problem.starterCode = normalizeStarterCode(problem.starterCode)
         return res.json({ problem })
     } catch (error) {
         console.error('Coding problem could not be loaded:', error.message)

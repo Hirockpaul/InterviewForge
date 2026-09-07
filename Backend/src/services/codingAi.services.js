@@ -45,6 +45,20 @@ const aiResponseSchema = z.object({ problems: z.array(z.object({
     timeComplexity: z.string(), spaceComplexity: z.string()
 })) })
 
+function normalizeStarterCode(starterCode) {
+    const normalized = Object.fromEntries(Object.entries(starterCode).map(([ language, code ]) => [
+        language,
+        code.includes('\\n') && !code.includes('\n')
+            ? code.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n').replace(/\\t/g, '\t')
+            : code
+    ]))
+
+    if (/(^|[^.\w])List\s*\[/.test(normalized.python) && !/^\s*from\s+typing\s+import[^\n]*\bList\b/m.test(normalized.python)) {
+        normalized.python = `from typing import List\n\n${normalized.python}`
+    }
+    return normalized
+}
+
 async function generateCodingProblems({ topic, displayTopic, difficulty, count, existingTitles }) {
     const response = await ai.models.generateContent({
         model,
@@ -74,13 +88,8 @@ Requirements:
 
     return generated.map((problem) => ({
         ...problem,
-        starterCode: Object.fromEntries(Object.entries(problem.starterCode).map(([ language, code ]) => [
-            language,
-            code.includes('\\n') && !code.includes('\n')
-                ? code.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n').replace(/\\t/g, '\t')
-                : code
-        ]))
+        starterCode: normalizeStarterCode(problem.starterCode)
     }))
 }
 
-module.exports = { generateCodingProblems, generatedProblemSchema, generatedProblemsSchema }
+module.exports = { generateCodingProblems, generatedProblemSchema, generatedProblemsSchema, normalizeStarterCode }

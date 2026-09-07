@@ -5,7 +5,7 @@ const codingProblemModel = require('../src/models/codingProblem.model')
 const codingService = require('../src/services/coding.services')
 const codingAiService = require('../src/services/codingAi.services')
 const { CODING_TOPICS } = require('../src/config/codingTopics')
-const { generatedProblemSchema } = require('../src/services/codingAi.services')
+const { generatedProblemSchema, normalizeStarterCode } = require('../src/services/codingAi.services')
 const { generationSchema, problemQuerySchema } = require('../src/controllers/coding.controller')
 
 const validProblem = {
@@ -54,6 +54,15 @@ test('AI-generated coding problem validation accepts complete data and rejects m
     assert.equal(generatedProblemSchema.safeParse(validProblem).success, true)
     assert.equal(generatedProblemSchema.safeParse({ ...validProblem, examples: [] }).success, false)
     assert.equal(generatedProblemSchema.safeParse({ ...validProblem, topic: 'unknown' }).success, false)
+})
+
+test('Python starter templates import List when their annotations require it', () => {
+    const starterCode = normalizeStarterCode({ ...validProblem.starterCode, python: 'class Solution:\n    def solve(self, nums: List[int]) -> bool:\n        pass' })
+    assert.match(starterCode.python, /^from typing import List/)
+    assert.equal((starterCode.python.match(/from typing import List/g) || []).length, 1)
+
+    const alreadyValid = normalizeStarterCode({ ...validProblem.starterCode, python: 'from typing import List\n\ndef solve(nums: List[int]):\n    pass' })
+    assert.equal((alreadyValid.python.match(/from typing import List/g) || []).length, 1)
 })
 
 test('Mongoose coding problem model validates required fields and language values', async () => {
