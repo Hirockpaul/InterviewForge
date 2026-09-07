@@ -1,8 +1,8 @@
 $background: #0b0d0f;
 $foreground: #f2efe8;
-$accent: #e85d8a;
-$accent-bright: #f05a87;
-$accent-dark: #c83f69;
+$accent: #dedede;
+$accent-bright: #f4f4f2;
+$accent-dark: #f0f0ee;
 $muted: #9ca3af;
 $label: #d6d1c8;
 $placeholder: #667085;
@@ -11,8 +11,8 @@ $input: #0f1114;
 $border: #292e35;
 $border-hover: #383e47;
 $button-text: #fff7fa;
-$font-ui: 'Inter', system-ui, sans-serif;
-$font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
+$font-ui: 'Delight', system-ui, sans-serif;
+$font-display: 'Denton', Georgia, 'Times New Roman', serif;
 
 .home-page {
     width: 100%;
@@ -202,7 +202,7 @@ $font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
     &__subtitle { max-width: 100%; margin: 0; overflow: hidden; color: $placeholder; font-size: 0.73rem; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
 }
 
-.upload-error { margin: 0; color: #e58b9c; font-size: 0.76rem; }
+.upload-error { margin: 0; color: #c97878; font-size: 0.76rem; }
 
 .or-divider {
     display: flex;
@@ -245,7 +245,7 @@ $font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
     cursor: pointer;
     transition: border-color 200ms, background-color 200ms, transform 150ms;
 
-    &:hover { border-color: #d94b78; background: #d94b78; }
+    &:hover { border-color: #f8f8f6; background: #f8f8f6; }
     &:active { transform: scale(0.995); }
     &:focus-visible { outline: 2px solid $accent-bright; outline-offset: 3px; }
 }
@@ -256,7 +256,7 @@ $font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
     border: 1px solid rgba(#c95b70, 0.35);
     border-radius: 0.4rem;
     background: rgba(#c95b70, 0.07);
-    color: #efa4b2;
+    color: #d18b8b;
     font-size: 0.78rem;
 }
 

@@ -1,4 +1,4 @@
-$background: #0b0d0f; $foreground: #f2efe8; $accent: #e85d8a; $accent-dark: #c83f69; $muted: #9ca3af; $label: #d6d1c8; $placeholder: #667085; $card: #14171b; $input: #0f1114; $border: #292e35; $font-ui: 'Inter', system-ui, sans-serif; $font-display: 'Anthropic Serif', Georgia, serif;
+$background: #0b0d0f; $foreground: #f2efe8; $accent: #dedede; $accent-dark: #f0f0ee; $muted: #9ca3af; $label: #d6d1c8; $placeholder: #667085; $card: #14171b; $input: #0f1114; $border: #292e35; $font-ui: 'Delight', system-ui, sans-serif; $font-display: 'Denton', Georgia, serif;
 
 .mock-page { min-height: 100svh; padding: 1.5rem clamp(1.25rem, 4vw, 4rem) 4rem; overflow-x: hidden; background: $background; color: $foreground; font-family: $font-ui; }
 .mock-main { width: 100%; max-width: 900px; margin: 0 auto; padding-top: clamp(3rem, 7vh, 5rem); }
@@ -16,7 +16,7 @@ $background: #0b0d0f; $foreground: #f2efe8; $accent: #e85d8a; $accent-dark: #c83
 .mock-question textarea:focus { border-color: $accent; box-shadow: 0 0 0 3px rgba($accent, 0.08); }
 .mock-question form button, .mock-results button { min-height: 44px; align-self: flex-end; margin-top: 0.5rem; padding: 0.7rem 1rem; border: 1px solid $accent-dark; border-radius: 0.4rem; background: $accent-dark; color: #fff7fa; font: 600 0.8rem $font-ui; cursor: pointer; }
 .mock-question form button:disabled { cursor: not-allowed; opacity: 0.5; }
-.mock-error { padding: 0.75rem; border: 1px solid rgba(#c95b70, 0.35); color: #efa4b2; }
+.mock-error { padding: 0.75rem; border: 1px solid rgba(#c95b70, 0.35); color: #d18b8b; }
 .mock-feedback { display: grid; grid-template-columns: auto 1fr; gap: 1.5rem 2rem; margin-top: 1rem; }
 .mock-feedback__score { display: flex; flex-direction: column; gap: 0.25rem; }
 .mock-feedback__score span { color: $muted; font-size: 0.72rem; }

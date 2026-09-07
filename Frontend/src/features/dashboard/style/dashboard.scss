@@ -1,16 +1,16 @@
 $background: #0b0d0f;
 $foreground: #f2efe8;
-$accent: #e85d8a;
-$accent-bright: #f05a87;
-$accent-dark: #c83f69;
+$accent: #dedede;
+$accent-bright: #f4f4f2;
+$accent-dark: #f0f0ee;
 $muted: #9ca3af;
 $label: #d6d1c8;
 $placeholder: #667085;
 $card: #14171b;
 $border: #292e35;
 $border-hover: #383e47;
-$font-ui: 'Inter', system-ui, sans-serif;
-$font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
+$font-ui: 'Delight', system-ui, sans-serif;
+$font-display: 'Denton', Georgia, 'Times New Roman', serif;
 
 .dashboard-page {
     width: 100%;
@@ -27,11 +27,11 @@ $font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
 .dashboard-recent { order: 5; }
 .dashboard-job-list { display: grid; gap: 12px; margin-top: 24px;
     article { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 20px 22px; border: 1px solid #302d30; border-radius: 14px; background: #171719;
-        h3 { font-family: Georgia, serif; font-size: 1.2rem; font-weight: 400; }
+        h3 { font-family: Denton, serif; font-size: 1.2rem; font-weight: 400; }
         p { margin-top: 4px; color: #d2cdd1; font-size: .88rem; }
         span { display: block; margin-top: 8px; color: #918c90; font-size: .76rem; text-transform: capitalize; }
         > div:last-child { display: flex; gap: 8px; }
-        button { padding: 9px 12px; border: 1px solid #474247; border-radius: 8px; background: transparent; color: white; cursor: pointer; &:last-child { border-color: #d20d3b; background: #d20d3b; } }
+        button { padding: 9px 12px; border: 1px solid #474247; border-radius: 8px; background: transparent; color: white; cursor: pointer; &:last-child { border-color: #f0f0ee; background: #f0f0ee; } }
     }
 }
 
@@ -101,7 +101,7 @@ $font-display: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
     cursor: pointer;
     transition: background-color 200ms, border-color 200ms, transform 150ms;
 
-    &:hover { border-color: #d94b78; background: #d94b78; }
+    &:hover { border-color: #f8f8f6; background: #f8f8f6; }
     &:active { transform: scale(0.995); }
     &:focus-visible { outline: 2px solid $accent-bright; outline-offset: 3px; }
 }

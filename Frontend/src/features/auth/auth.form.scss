@@ -1,8 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 @font-face {
-    font-family: 'Anthropic Serif';
-    src: local('Anthropic Serif');
+    font-family: 'Denton';
+    src: local('Denton'), local('Denton Text'), local('Denton Display');
     font-display: swap;
 }
 
@@ -16,9 +14,9 @@
     --auth-muted: #9ca3af;
     --auth-label: #d6d1c8;
     --auth-placeholder: #667085;
-    --auth-accent: #e85d8a;
-    --auth-accent-bright: #f05a87;
-    --auth-accent-dark: #c83f69;
+    --auth-accent: #dedede;
+    --auth-accent-bright: #f4f4f2;
+    --auth-accent-dark: #f0f0ee;
     --auth-button-text: #fff7fa;
     width: 100%;
     min-height: 100vh;
@@ -29,7 +27,7 @@
     padding: 1.5rem clamp(2rem, 4vw, 4rem) 1.75rem;
     background: var(--auth-bg);
     color: var(--auth-text);
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Delight', system-ui, sans-serif;
 }
 
 .auth-brand {
@@ -52,7 +50,7 @@
         place-items: center;
         border-radius: 0.35rem;
         background: var(--auth-accent-bright);
-        color: #fff;
+        color: #111214;
         font-size: 0.72rem;
         font-weight: 800;
     }
@@ -92,7 +90,7 @@
 
     h1 {
         margin: 0;
-        font-family: 'Anthropic Serif', Georgia, 'Times New Roman', serif;
+        font-family: 'Denton', Georgia, 'Times New Roman', serif;
         font-size: clamp(3rem, 4vw, 4rem);
         font-weight: 400;
         line-height: 1;
@@ -108,7 +106,7 @@
 
     &__accent {
         margin-top: 0.35rem;
-        color: var(--auth-accent);
+        color: var(--auth-text);
     }
 
     > p:last-child {
@@ -210,14 +208,14 @@
         background: var(--auth-input);
         color: #e5e7eb;
         padding: 0.7rem 0.85rem;
-        font: 400 0.86rem 'Inter', system-ui, sans-serif;
+        font: 400 0.86rem 'Delight', system-ui, sans-serif;
         transition: border-color 200ms, box-shadow 200ms;
 
         &::placeholder { color: var(--auth-placeholder); }
         &:hover { border-color: var(--auth-border-hover); }
         &:focus {
             border-color: var(--auth-accent);
-            box-shadow: 0 0 0 3px rgba(232, 93, 138, 0.1);
+            box-shadow: 0 0 0 3px rgba(238, 238, 236, 0.1);
         }
     }
 }
@@ -226,13 +224,13 @@
     margin-top: 0.15rem;
     border: 1px solid var(--auth-accent-dark);
     background: var(--auth-accent-dark);
-    color: var(--auth-button-text);
+    color: #111214;
 
-    &:hover:not(:disabled) { border-color: #d94b78; background: #d94b78; }
+    &:hover:not(:disabled) { border-color: #f8f8f6; background: #f8f8f6; }
     &:active:not(:disabled) { transform: scale(0.995); }
 }
 
-.login-error { margin: 0; color: #ff9aaa; font-size: 0.78rem; line-height: 1.45; }
+.login-error { margin: 0; color: #d88282; font-size: 0.78rem; line-height: 1.45; }
 
 .login-register {
     margin: 1rem 0 0;
@@ -369,7 +367,7 @@
     place-items: center;
     background: #0b0d0f;
     color: #9ca3af;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Delight', system-ui, sans-serif;
 
     p { margin: 0; }
 }
