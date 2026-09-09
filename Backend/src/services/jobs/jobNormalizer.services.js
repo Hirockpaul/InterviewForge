@@ -4,44 +4,157 @@ const { extractJobRequirements } = require('./jobRequirementsExtractor.services'
 const text = (value) => typeof value === 'string' ? value.trim() : ''
 const number = (value) => Number.isFinite(Number(value)) ? Number(value) : undefined
 const date = (value) => value && !Number.isNaN(new Date(value).getTime()) ? new Date(value) : undefined
-const list = (value) => Array.isArray(value) ? value.map((item) => text(typeof item === 'object' ? item.name || item.skill || item.label : item)).filter(Boolean) : []
-const countryNames = new Intl.DisplayNames([ 'en' ], { type: 'region' })
+const list = (value) => Array.isArray(value)
+    ? value.map(item => text(
+        typeof item === 'object' ? item.name || item.skill || item.label : item
+    )).filter(Boolean)
+    : []
+const countryNames = new Intl.DisplayNames(['en'], { type: 'region' })
 const countryCodes = { india: 'IN', 'united states': 'US', usa: 'US', 'united kingdom': 'GB', uk: 'GB', canada: 'CA', australia: 'AU', singapore: 'SG' }
-const countryCode = (value) => { const normalized = text(value).toLowerCase(); return normalized.length === 2 ? normalized.toUpperCase() : countryCodes[normalized] || text(value).toUpperCase() }
-const countryName = (code) => { try { return countryNames.of(text(code).toUpperCase()) || text(code) } catch { return text(code) } }
-const normalizeRemoteType = (value, isRemote = false) => /hybrid/i.test(value || '') ? 'hybrid' : /remote|fully_remote/i.test(value || '') || isRemote ? 'remote' : /on.?site/i.test(value || '') ? 'on-site' : ''
+function countryCode(value) {
+    const normalized = text(value).toLowerCase()
+    return normalized.length === 2
+        ? normalized.toUpperCase()
+        : countryCodes[normalized] || text(value).toUpperCase()
+}
+
+function countryName(code) {
+    try {
+        return countryNames.of(text(code).toUpperCase()) || text(code)
+    } catch {
+        return text(code)
+    }
+}
+
+function normalizeRemoteType(value, isRemote = false) {
+    if (/hybrid/i.test(value || '')) {
+        return 'hybrid'
+    }
+    if (/remote|fully_remote/i.test(value || '') || isRemote) {
+        return 'remote'
+    }
+    return /on.?site/i.test(value || '') ? 'on-site' : ''
+}
 const normalizeSeniority = (value, title = '') => {
-    if (text(value)) return text(value)
+    if (text(value)) {
+        return text(value)
+    }
     const match = text(title).match(/^(?:sr\.?|senior|staff|principal|lead|director|vice president|vp)\b/i)
-    if (!match) return ''
+    if (!match) {
+        return ''
+    }
     const levels = { sr: 'Senior', 'sr.': 'Senior', senior: 'Senior', staff: 'Staff', principal: 'Principal', lead: 'Lead', director: 'Director', 'vice president': 'Vice president', vp: 'Vice president' }
     return levels[match[0].toLowerCase()] || ''
 }
 const cleanKey = (value) => text(value).toLowerCase().replace(/https?:\/\/(www\.)?/, '').replace(/[^a-z0-9]+/g, ' ').trim()
-const safeUrl = (value) => { try { const url = new URL(text(value)); return [ 'http:', 'https:' ].includes(url.protocol) ? url.toString() : '' } catch { return '' } }
+function safeUrl(value) {
+    try {
+        const url = new URL(text(value))
+        return ['http:', 'https:'].includes(url.protocol) ? url.toString() : ''
+    } catch {
+        return ''
+    }
+}
 
 function fingerprint(job) {
-    const location = job.locations?.[0] || job.location?.display || [ job.location?.city, job.location?.state ].filter(Boolean).join(' ')
-    const applyHost = (() => { try { return new URL(job.applyUrl).hostname.replace(/^www\./, '') } catch { return '' } })()
-    return crypto.createHash('sha256').update([ job.title, job.company, location, applyHost ].map(cleanKey).join('|')).digest('hex')
+    const location = job.locations?.[0]
+        || job.location?.display
+        || [job.location?.city, job.location?.state].filter(Boolean).join(' ')
+    let applyHost = ''
+    try {
+        applyHost = new URL(job.applyUrl).hostname.replace(/^www\./, '')
+    } catch {
+        // An invalid or missing apply URL simply contributes an empty host.
+    }
+    return crypto.createHash('sha256')
+        .update([job.title, job.company, location, applyHost].map(cleanKey).join('|'))
+        .digest('hex')
 }
 
 function finish(job) {
-    const locations = [ ...new Set(list(job.locations)) ]
-    const countries = [ ...new Set(list(job.countries).map(countryCode)) ]
-    const display = locations[0] ? `${locations[0]}${countries[0] && !locations[0].toLowerCase().includes(countryName(countries[0]).toLowerCase()) ? `, ${countryName(countries[0])}` : ''}` : countries[0] ? countryName(countries[0]) : ''
+    const locations = [...new Set(list(job.locations))]
+    const countries = [...new Set(list(job.countries).map(countryCode))]
+    const primaryCountry = countries[0] ? countryName(countries[0]) : ''
+    const includeCountry = primaryCountry
+        && !locations[0]?.toLowerCase().includes(primaryCountry.toLowerCase())
+    const display = locations[0]
+        ? `${locations[0]}${includeCountry ? `, ${primaryCountry}` : ''}`
+        : primaryCountry
     const salaryMin = number(job.salaryMin ?? job.salary?.min)
     const salaryMax = number(job.salaryMax ?? job.salary?.max)
     const salaryCurrency = text(job.salaryCurrency || job.salary?.currency)
     const remoteType = normalizeRemoteType(job.remoteType || job.location?.remoteType, job.location?.remote)
     const description = text(job.description)
     const extracted = extractJobRequirements(description)
-    const structuredExperience = job.experience && (number(job.experience.minYears) != null || number(job.experience.maxYears) != null || text(job.experience.text)) ? { minYears: number(job.experience.minYears), maxYears: number(job.experience.maxYears), text: text(job.experience.text), source: 'provider' } : undefined
-    const providerLists = { responsibilities: list(job.responsibilities), requirements: list(job.requirements), qualifications: list(job.qualifications), benefits: list(job.benefits) }
-    const derivedFields = [ ...(job.derivedFields || []) ]
-    for (const field of [ 'responsibilities', 'requirements', 'qualifications', 'benefits' ]) if (!providerLists[field].length && extracted[field].length) derivedFields.push(field)
-    if (!structuredExperience && extracted.experience) derivedFields.push('experience')
-    const normalized = { ...job, title: text(job.title), company: text(job.company) || 'Company not listed', description, responsibilities: providerLists.responsibilities.length ? providerLists.responsibilities : extracted.responsibilities, requirements: providerLists.requirements.length ? providerLists.requirements : extracted.requirements, qualifications: providerLists.qualifications.length ? providerLists.qualifications : extracted.qualifications, benefits: providerLists.benefits.length ? providerLists.benefits : extracted.benefits, derivedFields: [ ...new Set(derivedFields) ], niceToHaveSkills: list(job.niceToHaveSkills), educationRequirements: list(job.educationRequirements), locations, countries, remoteType, location: { ...(job.location || {}), display, remote: remoteType === 'remote', remoteType }, employmentType: text(job.employmentType), seniority: normalizeSeniority(job.seniority, job.title), experience: structuredExperience || extracted.experience, salaryMin, salaryMax, salaryCurrency, salary: { min: salaryMin, max: salaryMax, currency: salaryCurrency, period: text(job.salary?.period) }, skills: [ ...new Set(list(job.skills)) ], postedAt: date(job.postedAt), applyUrl: safeUrl(job.applyUrl), sourceUrl: safeUrl(job.sourceUrl), isActive: job.isActive !== false }
+    const hasStructuredExperience = job.experience && (
+        number(job.experience.minYears) != null
+        || number(job.experience.maxYears) != null
+        || text(job.experience.text)
+    )
+    const structuredExperience = hasStructuredExperience ? {
+        minYears: number(job.experience.minYears),
+        maxYears: number(job.experience.maxYears),
+        text: text(job.experience.text),
+        source: 'provider'
+    } : undefined
+    const providerLists = {
+        responsibilities: list(job.responsibilities),
+        requirements: list(job.requirements),
+        qualifications: list(job.qualifications),
+        benefits: list(job.benefits)
+    }
+    const derivedFields = [...(job.derivedFields || [])]
+    for (const field of ['responsibilities', 'requirements', 'qualifications', 'benefits']) {
+        if (!providerLists[field].length && extracted[field].length) {
+            derivedFields.push(field)
+        }
+    }
+    if (!structuredExperience && extracted.experience) {
+        derivedFields.push('experience')
+    }
+
+    const normalized = {
+        ...job,
+        title: text(job.title),
+        company: text(job.company) || 'Company not listed',
+        description,
+        responsibilities: providerLists.responsibilities.length
+            ? providerLists.responsibilities : extracted.responsibilities,
+        requirements: providerLists.requirements.length
+            ? providerLists.requirements : extracted.requirements,
+        qualifications: providerLists.qualifications.length
+            ? providerLists.qualifications : extracted.qualifications,
+        benefits: providerLists.benefits.length ? providerLists.benefits : extracted.benefits,
+        derivedFields: [...new Set(derivedFields)],
+        niceToHaveSkills: list(job.niceToHaveSkills),
+        educationRequirements: list(job.educationRequirements),
+        locations,
+        countries,
+        remoteType,
+        location: {
+            ...(job.location || {}),
+            display,
+            remote: remoteType === 'remote',
+            remoteType
+        },
+        employmentType: text(job.employmentType),
+        seniority: normalizeSeniority(job.seniority, job.title),
+        experience: structuredExperience || extracted.experience,
+        salaryMin,
+        salaryMax,
+        salaryCurrency,
+        salary: {
+            min: salaryMin,
+            max: salaryMax,
+            currency: salaryCurrency,
+            period: text(job.salary?.period)
+        },
+        skills: [...new Set(list(job.skills))],
+        postedAt: date(job.postedAt),
+        applyUrl: safeUrl(job.applyUrl),
+        sourceUrl: safeUrl(job.sourceUrl),
+        isActive: job.isActive !== false
+    }
     normalized.fingerprint = fingerprint(normalized)
     return normalized.title && normalized.sourceJobId ? normalized : null
 }

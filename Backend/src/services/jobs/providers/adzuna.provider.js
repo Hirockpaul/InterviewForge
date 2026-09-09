@@ -6,7 +6,8 @@ const configured = () => Boolean(process.env.ADZUNA_APP_ID && process.env.ADZUNA
 
 function buildSearchUrl(params) {
     const country = normalizeCountry(params.country || process.env.ADZUNA_COUNTRY).toLowerCase()
-    const query = new URLSearchParams({ app_id: process.env.ADZUNA_APP_ID, app_key: process.env.ADZUNA_APP_KEY, results_per_page: String(params.limit || 20), what: params.q || '' })
+    const query = new URLSearchParams({ app_id: process.env.ADZUNA_APP_ID, app_key: process.env.ADZUNA_APP_KEY, results_per_page:
+         String(params.limit || 20), what: params.q || '' })
     const location = normalizeLocation(params.location)
     if (location) query.set('where', location)
     if (params.salaryMin) query.set('salary_min', String(params.salaryMin))

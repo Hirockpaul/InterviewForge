@@ -8,9 +8,19 @@ async function recordActivity({ user, type, sourceId, occurredAt = new Date() })
     )
 }
 
-const partsFor = (date, timeZone) => Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
-    timeZone, year: 'numeric', month: '2-digit', day: '2-digit'
-}).formatToParts(date).filter((part) => part.type !== 'literal').map((part) => [ part.type, part.value ]))
+function partsFor(date, timeZone) {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    })
+    return Object.fromEntries(
+        formatter.formatToParts(date)
+            .filter(part => part.type !== 'literal')
+            .map(part => [part.type, part.value])
+    )
+}
 
 const dateKey = (date, timeZone) => {
     const parts = partsFor(date, timeZone)
@@ -18,13 +28,24 @@ const dateKey = (date, timeZone) => {
 }
 
 const ordinal = (key) => {
-    const [ year, month, day ] = key.split('-').map(Number)
+    const [year, month, day] = key.split('-').map(Number)
     return Math.floor(Date.UTC(year, month - 1, day) / 86400000)
 }
 
 function calculateStreak(activities, timeZone = 'UTC', now = new Date()) {
-    const keys = [ ...new Set(activities.map((activity) => dateKey(new Date(activity.occurredAt), timeZone))) ].sort()
-    if (!keys.length) return { currentStreak: 0, longestStreak: 0, totalActiveDays: 0, lastActivityDate: null, preparationThisWeek: 0, week: [] }
+    const keys = [...new Set(
+        activities.map(activity => dateKey(new Date(activity.occurredAt), timeZone))
+    )].sort()
+    if (!keys.length) {
+        return {
+            currentStreak: 0,
+            longestStreak: 0,
+            totalActiveDays: 0,
+            lastActivityDate: null,
+            preparationThisWeek: 0,
+            week: []
+        }
+    }
 
     let longestStreak = 1
     let run = 1
@@ -39,7 +60,13 @@ function calculateStreak(activities, timeZone = 'UTC', now = new Date()) {
     let currentStreak = 0
     if (gap <= 1) {
         currentStreak = 1
-        for (let index = keys.length - 1; index > 0 && ordinal(keys[index]) - ordinal(keys[index - 1]) === 1; index -= 1) currentStreak += 1
+        for (
+            let index = keys.length - 1;
+            index > 0 && ordinal(keys[index]) - ordinal(keys[index - 1]) === 1;
+            index -= 1
+        ) {
+            currentStreak += 1
+        }
     }
 
     const todayOrdinal = ordinal(today)
@@ -48,10 +75,21 @@ function calculateStreak(activities, timeZone = 'UTC', now = new Date()) {
     const active = new Set(keys)
     const week = Array.from({ length: 7 }, (_, index) => {
         const date = new Date((mondayOrdinal + index) * 86400000).toISOString().slice(0, 10)
-        return { date, label: [ 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' ][index], active: active.has(date) }
+        return {
+            date,
+            label: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index],
+            active: active.has(date)
+        }
     })
 
-    return { currentStreak, longestStreak, totalActiveDays: keys.length, lastActivityDate: last, preparationThisWeek: week.filter((day) => day.active).length, week }
+    return {
+        currentStreak,
+        longestStreak,
+        totalActiveDays: keys.length,
+        lastActivityDate: last,
+        preparationThisWeek: week.filter(day => day.active).length,
+        week
+    }
 }
 
 module.exports = { recordActivity, calculateStreak, dateKey }

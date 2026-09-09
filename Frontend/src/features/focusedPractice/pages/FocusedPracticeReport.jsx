@@ -1,16 +1,255 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
-import AppHeader from '../../../components/layout/AppHeader'
-import SaveQuestionButton from '../../preparation/components/SaveQuestionButton'
-import { getFocusedReport } from '../services/focusedPractice.api'
-import '../../preparation/style/preparation.scss'
-import '../style/focused-practice.scss'
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import AppHeader from "../../../components/layout/AppHeader";
+import SaveQuestionButton from "../../preparation/components/SaveQuestionButton";
+import { getFocusedReport } from "../services/focusedPractice.api";
+import "../../preparation/style/preparation.scss";
+import "../style/focused-practice.scss";
 
-const labels={technicalAccuracy:'Technical accuracy',communication:'Communication',clarity:'Clarity',depth:'Depth',relevance:'Relevance',technicalUnderstanding:'Technical understanding',implementationKnowledge:'Implementation knowledge',decisionMaking:'Decision making',problemSolving:'Problem solving'}
-const FocusedPracticeReport=()=>{const{id}=useParams(),navigate=useNavigate(),[session,setSession]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState(''),[open,setOpen]=useState(null)
-const load=()=>{setLoading(true);setError('');getFocusedReport(id).then(data=>setSession(data.session)).catch(e=>setError(e.response?.data?.message||'Unable to load the final report.')).finally(()=>setLoading(false))}
-useEffect(()=>{getFocusedReport(id).then(data=>setSession(data.session)).catch(e=>setError(e.response?.data?.message||'Unable to load the final report.')).finally(()=>setLoading(false))},[id])
-if(loading)return <main className='prep-page prep-state'>Analyzing your interview performance...</main>
-if(error&&!session)return <main className='prep-page prep-state'><h1>Report unavailable</h1><p>{error}</p><button className='prep-secondary' onClick={load}>Retry</button></main>
-return <div className='prep-page'><AppHeader/><main className='prep-main focused-report'><header className='prep-heading'><p>Practice complete · 24 / 24</p><h1>Performance report</h1><span>{session.displayTopic} · {session.mode} practice</span></header><section className='focused-score-card prep-card'><div><span>Overall score</span><strong>{session.overallScore}%</strong></div><div className='metric-grid'>{Object.entries(session.report.difficultyPerformance).map(([key,value])=><article key={key}><span>{key}</span><strong>{value}%</strong></article>)}</div></section><section><div className='prep-heading'><p>Evaluation criteria</p><h2>Answer performance</h2></div><div className='metric-grid'>{Object.entries(session.report.dimensions).map(([key,value])=><article key={key}><span>{labels[key]||key}</span><strong>{value}%</strong></article>)}</div></section><section className='prep-grid'><article className='prep-card'><h2>Strongest areas</h2><ul>{session.report.strongestAreas.map(x=><li key={x}>{x}</li>)}</ul></article><article className='prep-card'><h2>Priority improvement</h2><strong className='focused-priority'>{session.report.priorityImprovement}</strong><ul>{session.report.recommendations.map(x=><li key={x}>{x}</li>)}</ul></article></section><section><div className='prep-heading'><p>Question review</p><h2>All answers</h2></div><div className='prep-list'>{session.answers.map((item,index)=>{const expanded=open===index,e=item.evaluation,categoryScores=Object.entries(e.categoryScores||{}).filter(([,value])=>value>0);return <article className='prep-card focused-review' key={item.question._id}><button className='focused-review__head' onClick={()=>setOpen(expanded?null:index)}><span>Q{index+1}</span><strong>{item.question.question}</strong><b>{e.score}%</b></button>{expanded&&<div className='focused-review__body'><div className='prep-meta'><span>{item.question.difficulty}</span><span>· {item.question.category}</span><span>· {item.timeTaken}s / {item.timeLimit}s</span>{item.submittedAutomatically&&<span>· Auto-submitted</span>}</div><h3>Your answer</h3><p>{item.answer||'No answer submitted.'}</p>{categoryScores.length>0&&<div className='metric-grid'>{categoryScores.map(([key,value])=><article key={key}><span>{labels[key]||key}</span><strong>{value}%</strong></article>)}</div>}<h3>Feedback</h3><p>{e.feedback}</p><div className='prep-grid'><div><h3>Strengths</h3><ul>{e.strengths.map(x=><li key={x}>{x}</li>)}</ul></div><div><h3>Weaknesses</h3><ul>{e.weaknesses.map(x=><li key={x}>{x}</li>)}</ul></div></div><p><strong>Recommended improvement:</strong> {e.recommendedImprovement}</p><SaveQuestionButton question={{questionText:item.question.question,source:'other',category:item.question.category==='system-design'?'system-design':item.question.category==='behavioral'?'behavioral':item.question.category==='project'?'project':'technical',topic:item.question.topic,difficulty:item.question.difficulty==='easy'?'beginner':item.question.difficulty==='hard'?'advanced':'intermediate',sourceId:item.question._id,personalAnswer:item.answer,evaluationSnapshot:{score:e.score,strengths:e.strengths,weaknesses:e.weaknesses,feedback:e.feedback,recommendedImprovement:e.recommendedImprovement}}}/></div>}</article>})}</div></section><div className='prep-actions'><button className='prep-primary' onClick={()=>navigate('/focused-practice')}>Start another session</button><button className='prep-secondary' onClick={()=>navigate('/progress')}>View overall progress</button></div></main></div>}
-export default FocusedPracticeReport
+const labels = {
+  technicalAccuracy: "Technical accuracy",
+  communication: "Communication",
+  clarity: "Clarity",
+  depth: "Depth",
+  relevance: "Relevance",
+  technicalUnderstanding: "Technical understanding",
+  implementationKnowledge: "Implementation knowledge",
+  decisionMaking: "Decision making",
+  problemSolving: "Problem solving",
+};
+const FocusedPracticeReport = () => {
+  const { id } = useParams(),
+    navigate = useNavigate(),
+    [session, setSession] = useState(null),
+    [loading, setLoading] = useState(true),
+    [error, setError] = useState(""),
+    [open, setOpen] = useState(null);
+  const load = () => {
+    setLoading(true);
+    setError("");
+    getFocusedReport(id)
+      .then((data) => setSession(data.session))
+      .catch((e) =>
+        setError(
+          e.response?.data?.message || "Unable to load the final report.",
+        ),
+      )
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => {
+    getFocusedReport(id)
+      .then((data) => setSession(data.session))
+      .catch((e) =>
+        setError(
+          e.response?.data?.message || "Unable to load the final report.",
+        ),
+      )
+      .finally(() => setLoading(false));
+  }, [id]);
+  if (loading)
+    return (
+      <main className="prep-page prep-state">
+        Analyzing your interview performance...
+      </main>
+    );
+  if (error && !session)
+    return (
+      <main className="prep-page prep-state">
+        <h1>Report unavailable</h1>
+        <p>{error}</p>
+        <button className="prep-secondary" onClick={load}>
+          Retry
+        </button>
+      </main>
+    );
+  return (
+    <div className="prep-page">
+      <AppHeader />
+      <main className="prep-main focused-report">
+        <header className="prep-heading">
+          <p>Practice complete · 24 / 24</p>
+          <h1>Performance report</h1>
+          <span>
+            {session.displayTopic} · {session.mode} practice
+          </span>
+        </header>
+        <section className="focused-score-card prep-card">
+          <div>
+            <span>Overall score</span>
+            <strong>{session.overallScore}%</strong>
+          </div>
+          <div className="metric-grid">
+            {Object.entries(session.report.difficultyPerformance).map(
+              ([key, value]) => (
+                <article key={key}>
+                  <span>{key}</span>
+                  <strong>{value}%</strong>
+                </article>
+              ),
+            )}
+          </div>
+        </section>
+        <section>
+          <div className="prep-heading">
+            <p>Evaluation criteria</p>
+            <h2>Answer performance</h2>
+          </div>
+          <div className="metric-grid">
+            {Object.entries(session.report.dimensions).map(([key, value]) => (
+              <article key={key}>
+                <span>{labels[key] || key}</span>
+                <strong>{value}%</strong>
+              </article>
+            ))}
+          </div>
+        </section>
+        <section className="prep-grid">
+          <article className="prep-card">
+            <h2>Strongest areas</h2>
+            <ul>
+              {session.report.strongestAreas.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
+          </article>
+          <article className="prep-card">
+            <h2>Priority improvement</h2>
+            <strong className="focused-priority">
+              {session.report.priorityImprovement}
+            </strong>
+            <ul>
+              {session.report.recommendations.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
+          </article>
+        </section>
+        <section>
+          <div className="prep-heading">
+            <p>Question review</p>
+            <h2>All answers</h2>
+          </div>
+          <div className="prep-list">
+            {session.answers.map((item, index) => {
+              const expanded = open === index,
+                e = item.evaluation,
+                categoryScores = Object.entries(e.categoryScores || {}).filter(
+                  ([, value]) => value > 0,
+                );
+              return (
+                <article
+                  className="prep-card focused-review"
+                  key={item.question._id}
+                >
+                  <button
+                    className="focused-review__head"
+                    onClick={() => setOpen(expanded ? null : index)}
+                  >
+                    <span>Q{index + 1}</span>
+                    <strong>{item.question.question}</strong>
+                    <b>{e.score}%</b>
+                  </button>
+                  {expanded && (
+                    <div className="focused-review__body">
+                      <div className="prep-meta">
+                        <span>{item.question.difficulty}</span>
+                        <span>· {item.question.category}</span>
+                        <span>
+                          · {item.timeTaken}s / {item.timeLimit}s
+                        </span>
+                        {item.submittedAutomatically && (
+                          <span>· Auto-submitted</span>
+                        )}
+                      </div>
+                      <h3>Your answer</h3>
+                      <p>{item.answer || "No answer submitted."}</p>
+                      {categoryScores.length > 0 && (
+                        <div className="metric-grid">
+                          {categoryScores.map(([key, value]) => (
+                            <article key={key}>
+                              <span>{labels[key] || key}</span>
+                              <strong>{value}%</strong>
+                            </article>
+                          ))}
+                        </div>
+                      )}
+                      <h3>Feedback</h3>
+                      <p>{e.feedback}</p>
+                      <div className="prep-grid">
+                        <div>
+                          <h3>Strengths</h3>
+                          <ul>
+                            {e.strengths.map((x) => (
+                              <li key={x}>{x}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h3>Weaknesses</h3>
+                          <ul>
+                            {e.weaknesses.map((x) => (
+                              <li key={x}>{x}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      <p>
+                        <strong>Recommended improvement:</strong>{" "}
+                        {e.recommendedImprovement}
+                      </p>
+                      <SaveQuestionButton
+                        question={{
+                          questionText: item.question.question,
+                          source: "other",
+                          category:
+                            item.question.category === "system-design"
+                              ? "system-design"
+                              : item.question.category === "behavioral"
+                                ? "behavioral"
+                                : item.question.category === "project"
+                                  ? "project"
+                                  : "technical",
+                          topic: item.question.topic,
+                          difficulty:
+                            item.question.difficulty === "easy"
+                              ? "beginner"
+                              : item.question.difficulty === "hard"
+                                ? "advanced"
+                                : "intermediate",
+                          sourceId: item.question._id,
+                          personalAnswer: item.answer,
+                          evaluationSnapshot: {
+                            score: e.score,
+                            strengths: e.strengths,
+                            weaknesses: e.weaknesses,
+                            feedback: e.feedback,
+                            recommendedImprovement: e.recommendedImprovement,
+                          },
+                        }}
+                      />
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+        <div className="prep-actions">
+          <button
+            className="prep-primary"
+            onClick={() => navigate("/focused-practice")}
+          >
+            Start another session
+          </button>
+          <button
+            className="prep-secondary"
+            onClick={() => navigate("/progress")}
+          >
+            View overall progress
+          </button>
+        </div>
+      </main>
+    </div>
+  );
+};
+export default FocusedPracticeReport;

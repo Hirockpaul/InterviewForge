@@ -1,25 +1,22 @@
 const mongoose = require('mongoose')
-
+const { ALLOWED_AVATAR_STYLES, DEFAULT_AVATAR_STYLE } = require('../config/avatarStyles')
 
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
-        unique: [true, "username already taken"],
-        required:true,
+        unique: [true, 'username already taken'],
+        required: true
     },
-
     email: {
         type: String,
-        unique: [true, "Account already exists with this email adress"],
-        required: true,
+        unique: [true, 'Account already exists with this email adress'],
+        required: true
     },
-
     password: {
         type: String,
         required: true,
         select: false
     },
-
     googleId: {
         type: String,
         unique: true,
@@ -28,13 +25,9 @@ const userSchema = new mongoose.Schema({
 
     avatarStyle: {
         type: String,
-        enum: [
-            'pixel-art', 'avataaars', 'adventurer', 'personas', 'lorelei',
-            'notionists-neutral', 'notionists', 'micah', 'big-smile', 'open-peeps'
-        ],
-        default: 'pixel-art'
+        enum: ALLOWED_AVATAR_STYLES,
+        default: DEFAULT_AVATAR_STYLE
     },
-
     avatarSeed: {
         type: String,
         trim: true,
@@ -49,6 +42,4 @@ const userSchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-const userModel = mongoose.model("Users", userSchema)
-
-module.exports = userModel
+module.exports = mongoose.model('Users', userSchema)

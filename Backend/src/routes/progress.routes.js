@@ -1,9 +1,9 @@
-const express = require('express')
-const authMiddleware = require('../middlewares/auth.middlewares')
-const { getProgressController } = require('../controllers/progress.controller')
+const express = require("express");
+const authMiddleware = require("../middlewares/auth.middlewares");
+const { getProgressController } = require("../controllers/progress.controller");
 
-const progressRouter = express.Router()
+const progressRouter = express.Router();
 
-progressRouter.get('/', authMiddleware.authUser, getProgressController)
+progressRouter.get("/", authMiddleware.authUser, getProgressController);
 
-module.exports = progressRouter
+module.exports = progressRouter;

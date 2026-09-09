@@ -9,7 +9,9 @@ function buildSearchUrl(params) {
     const query = new URLSearchParams({ q: params.q || '*', page: String(params.page || 1), per_page: String(params.limit || 20) })
     if (location) query.set('location', location)
     query.set('countries', normalizeCountry(params.country))
-    query.set('sort_by', params.sort === 'salary-desc' ? 'salary_max_usd:desc' : params.sort === 'salary-asc' ? 'salary_min_usd:asc' : params.sort === 'oldest' ? 'posted_at:asc' : 'posted_at:desc')
+    query.set('sort_by', params.sort === 'salary-desc' ? 'salary_max_usd:desc' :
+         params.sort === 'salary-asc' ? 'salary_min_usd:asc' :
+         params.sort === 'oldest' ? 'posted_at:asc' : 'posted_at:desc')
     if (params.remote === 'remote') query.set('remote_type', 'fully_remote')
     if (params.experience) query.set('seniority', params.experience)
     if (params.salaryMin) query.set('salary_min', String(params.salaryMin))
@@ -25,7 +27,8 @@ async function searchJobs(params) {
 
 async function getJobDetails(job) {
     if (!configured() || !job.sourceHandle) return null
-    const data = await getJson(`https://api.jobdatalake.com/v1/jobs/${encodeURIComponent(job.sourceHandle)}`, { headers: { 'X-API-Key': process.env.JOBDATALAKE_API_KEY } })
+    const data = await getJson(`https://api.jobdatalake.com/v1/jobs/${encodeURIComponent(job.sourceHandle)}`,
+     { headers: { 'X-API-Key': process.env.JOBDATALAKE_API_KEY } })
     return normalizeJobDataLake(data.job || data.data || data)
 }
 

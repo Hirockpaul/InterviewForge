@@ -1,106 +1,184 @@
 @use "./style/button.scss";
 
 @font-face {
-    font-family: "Denton";
-    src: local("Denton"), local("Denton Text"), local("Denton Display");
-    font-display: swap;
+  font-family: "Denton";
+  src: local("Denton"), local("Denton Text"), local("Denton Display");
+  font-display: swap;
 }
 
 @font-face {
-    font-family: "Delight";
-    src: local("Delight"), local("Delight Text");
-    font-display: swap;
+  font-family: "Delight";
+  src: local("Delight"), local("Delight Text");
+  font-display: swap;
 }
 
 :root {
-    color-scheme: dark;
-    --if-bg: #0b0d0f;
-    --if-bg-deep: #08090b;
-    --if-surface: #14171b;
-    --if-surface-raised: #181b20;
-    --if-input: #0f1114;
-    --if-border: #292e35;
-    --if-border-strong: #3a414b;
-    --if-text: #f2efe8;
-    --if-text-soft: #d6d1c8;
-    --if-muted: #aeb6bf;
-    --if-faint: #828c99;
-    --if-accent: #dedede;
-    --if-accent-strong: #f2f2f0;
-    --if-font-display: "Denton", "Times New Roman", Georgia, serif;
-    --if-font-ui: "Delight", "Helvetica Neue", Arial, system-ui, sans-serif;
-    --if-radius-sm: 6px;
-    --if-radius-md: 10px;
-    --if-content-wide: 1480px;
-    --if-content: 1400px;
-    --if-content-form: 1120px;
-    --if-content-reading: 900px;
-    --if-grid-gap: 24px;
-    --if-transition: 180ms ease;
-    --type-page-eyebrow: 0.8rem;
-    --type-page-title: clamp(3rem, 5vw, 4rem);
-    --type-page-subtitle: 1.05rem;
-    --type-section-title: clamp(1.75rem, 3vw, 2.5rem);
-    --type-card-title: 1.05rem;
-    --type-card-label: 0.82rem;
-    --type-body: 1rem;
-    --type-metadata: 0.82rem;
-    --type-metric: clamp(2.5rem, 4vw, 2.75rem);
+  color-scheme: dark;
+  --if-bg: #0b0d0f;
+  --if-bg-deep: #08090b;
+  --if-surface: #14171b;
+  --if-surface-raised: #181b20;
+  --if-input: #0f1114;
+  --if-border: #292e35;
+  --if-border-strong: #3a414b;
+  --if-text: #f2efe8;
+  --if-text-soft: #d6d1c8;
+  --if-muted: #aeb6bf;
+  --if-faint: #828c99;
+  --if-accent: #dedede;
+  --if-accent-strong: #f2f2f0;
+  --if-font-display: "Denton", "Times New Roman", Georgia, serif;
+  --if-font-ui: "Delight", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --if-radius-sm: 6px;
+  --if-radius-md: 10px;
+  --if-content-wide: 1480px;
+  --if-content: 1400px;
+  --if-content-form: 1120px;
+  --if-content-reading: 900px;
+  --if-grid-gap: 24px;
+  --if-transition: 180ms ease;
+  --type-page-eyebrow: 0.8rem;
+  --type-page-title: clamp(3rem, 5vw, 4rem);
+  --type-page-subtitle: 1.05rem;
+  --type-section-title: clamp(1.75rem, 3vw, 2.5rem);
+  --type-card-title: 1.05rem;
+  --type-card-label: 0.82rem;
+  --type-body: 1rem;
+  --type-metadata: 0.82rem;
+  --type-metric: clamp(2.5rem, 4vw, 2.75rem);
 }
 
 @media (max-width: 760px) {
-    :root { --type-page-title: clamp(2.25rem, 10vw, 2.75rem); --type-section-title: clamp(1.65rem, 7vw, 2rem); }
+  :root {
+    --type-page-title: clamp(2.25rem, 10vw, 2.75rem);
+    --type-section-title: clamp(1.65rem, 7vw, 2rem);
+  }
 }
 
 * {
-    margin: 0%;
-    padding: 0%;
-    box-sizing: border-box;
+  margin: 0%;
+  padding: 0%;
+  box-sizing: border-box;
 }
 
 html,
 body,
-#root{
-    width: 100%;
-    background-color: var(--if-bg);
-    color: var(--if-text);
-    font-family: var(--if-font-ui);
+#root {
+  width: 100%;
+  background-color: var(--if-bg);
+  color: var(--if-text);
+  font-family: var(--if-font-ui);
 }
 
 html {
-    // Scale text for wide desktop screens while retaining the familiar mobile size.
-    font-size: clamp(16px, calc(15px + 0.22vw), 19px);
-    scrollbar-color: #343941 var(--if-bg);
+  // Scale text for wide desktop screens while retaining the familiar mobile size.
+  font-size: clamp(16px, calc(15px + 0.22vw), 19px);
+  scrollbar-color: #343941 var(--if-bg);
 }
-body { min-height: 100vh; min-height: 100svh; font-size: var(--type-body); line-height: 1.5; }
-::selection { background: #dedede; color: #111; }
-a, button, input, select, textarea { transition-duration: var(--if-transition); }
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  font-size: var(--type-body);
+  line-height: 1.5;
+}
+::selection {
+  background: #dedede;
+  color: #111;
+}
+a,
+button,
+input,
+select,
+textarea {
+  transition-duration: var(--if-transition);
+}
 
-button, input, select, textarea, a { &:focus-visible { outline: 2px solid #ededeb; outline-offset: 3px; } }
-button, input, select, textarea { font: inherit; }
+button,
+input,
+select,
+textarea,
+a {
+  &:focus-visible {
+    outline: 2px solid #ededeb;
+    outline-offset: 3px;
+  }
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
 @media (max-width: 900px) {
-    html { font-size: 16px; }
-    html, body, #root { overflow-x: hidden; }
+  html {
+    font-size: 16px;
+  }
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+  }
 }
 
-.highlight{
-    color: var(--if-accent);
+.highlight {
+  color: var(--if-accent);
 }
 
-:where(h1, h2, h3, .app-brand__name) { font-family: var(--if-font-display); }
-:where(button, input, select, textarea, label, nav, small) { font-family: var(--if-font-ui); }
+:where(h1, h2, h3, .app-brand__name) {
+  font-family: var(--if-font-display);
+}
+:where(button, input, select, textarea, label, nav, small) {
+  font-family: var(--if-font-ui);
+}
 
 // Product actions are deliberately monochrome. Status/error colors remain semantic.
-:where(.dashboard-primary,.generate-btn,.prep-primary,.jobs-search button,.job-button:not(.job-button--quiet),.history-heading > button,.history-card__mock,.mock-start-btn,.mock-question form button,.mock-results button,.progress-recommendation button,.progress-state button,.profile-actions button:last-child,.button.primary-button) {
-    border-color: #eeeeec !important;
-    background: #eeeeec !important;
-    color: #111214 !important;
+:where(
+  .dashboard-primary,
+  .generate-btn,
+  .prep-primary,
+  .jobs-search button,
+  .job-button:not(.job-button--quiet),
+  .history-heading > button,
+  .history-card__mock,
+  .mock-start-btn,
+  .mock-question form button,
+  .mock-results button,
+  .progress-recommendation button,
+  .progress-state button,
+  .profile-actions button:last-child,
+  .button.primary-button
+) {
+  border-color: #eeeeec !important;
+  background: #eeeeec !important;
+  color: #111214 !important;
 }
-:where(.dashboard-primary,.generate-btn,.prep-primary,.jobs-search button,.job-button:not(.job-button--quiet),.history-heading > button,.history-card__mock,.mock-start-btn,.mock-question form button,.mock-results button,.progress-recommendation button,.progress-state button,.profile-actions button:last-child,.button.primary-button):hover:not(:disabled) {
-    border-color: #fff !important;
-    background: #fff !important;
+:where(
+    .dashboard-primary,
+    .generate-btn,
+    .prep-primary,
+    .jobs-search button,
+    .job-button:not(.job-button--quiet),
+    .history-heading > button,
+    .history-card__mock,
+    .mock-start-btn,
+    .mock-question form button,
+    .mock-results button,
+    .progress-recommendation button,
+    .progress-state button,
+    .profile-actions button:last-child,
+    .button.primary-button
+  ):hover:not(:disabled) {
+  border-color: #fff !important;
+  background: #fff !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

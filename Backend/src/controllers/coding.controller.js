@@ -92,10 +92,14 @@ async function problemsController(req, res) {
 }
 
 async function problemController(req, res) {
-    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid coding problem ID.' })
+    if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).json({ message: 'Invalid coding problem ID.' })
+    }
     try {
         const problem = await codingProblemModel.findById(req.params.id).lean({ flattenMaps: true })
-        if (!problem) return res.status(404).json({ message: 'Coding problem not found.' })
+        if (!problem) {
+            return res.status(404).json({ message: 'Coding problem not found.' })
+        }
         problem.starterCode = normalizeStarterCode(problem.starterCode)
         return res.json({ problem })
     } catch (error) {
